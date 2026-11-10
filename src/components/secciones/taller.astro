@@ -1,0 +1,52 @@
+---
+// «Taller propio»: banda del color primario a todo el ancho, partida: la foto del taller (`imagen`) a sangre a la izquierda
+// y de toda la altura; a la derecha el titular, los `items` {titulo, texto} como filas con filetes y las teclas (`cta`,
+// por defecto al contacto, y llamar al taller). El texto sobre el primario se elige solo (claro u oscuro).
+// Sin `imagen`, la banda es solo texto en dos columnas.
+import { seccion, site, tel, fuera } from '../../data/site';
+import { altSeccion } from '../../lib/seo';
+import Titular from '../ui/Titular.astro';
+import Imagen from '../ui/Imagen.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const c = site.contacto;
+---
+
+{
+  s && (s.titulo || s.items.length > 0 || s.imagen) && (
+    <section id={Astro.props.id} class:list={['banda', 'banda--primaria', { 'banda--sin-relleno': s.imagen }]}>
+      <div class:list={[s.imagen ? 'mitades mitades--foto-izq' : 'contenedor partido']}>
+        <div class:list={[s.imagen ? 'mitad-texto' : '']}>
+          <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} />
+          {s.items.length > 0 && (
+            <ul class="filas taller-filas">
+              {s.items.map((it) => (
+                <li>
+                  <p class="filas-titulo">{it.titulo}</p>
+                  {it.texto && <p class="filas-texto">{it.texto}</p>}
+                </li>
+              ))}
+            </ul>
+          )}
+          {(s.cta?.url || c.telefono) && (
+            <div class="botones">
+              {s.cta?.url && <a class="btn" href={s.cta.url} {...fuera(s.cta.url)}>{s.cta.texto}</a>}
+              {c.telefono && <a class="btn-sec" href={tel(c.telefono)}>Llamar al {c.telefono}</a>}
+            </div>
+          )}
+        </div>
+        {s.imagen && (
+          <div class="mitad-foto foto foto--sangre">
+            <Imagen src={s.imagen} alt={altSeccion(s)} ancho={1050} alto={1400} />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .taller-filas { margin-top: 2.25rem; }
+  .taller-filas .filas-texto { color: color-mix(in oklab, var(--sobre-primario) 84%, var(--c-primario)); }
+  @media (min-width: 40rem) { .taller-filas li { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+</style>

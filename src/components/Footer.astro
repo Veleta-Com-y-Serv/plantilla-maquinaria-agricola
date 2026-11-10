@@ -1,0 +1,112 @@
+---
+// Pie «surco»: banda de tinta (color del texto) a todo el ancho con el nombre muy grande en Red Hat Display (mástil) y
+// cuatro columnas: horario, dónde estamos, contacto y menú con redes. Todo de site.yaml → contacto, redes y menu.
+// «Web creada con NoExpertise» se muestra si site.yaml → marca_pie no es false (plan gratis).
+// En móvil, barra fija abajo con «Llamar» y «WhatsApp» (o, sin él, «Pedir precio» al contacto).
+import { site, tel, mapa, whatsapp, seccion, fuera } from '../data/site';
+import { enlace } from '../lib/multipagina';
+import Icono from './ui/Icono.astro';
+interface Props { variante?: string }
+const { variante = 'surco' } = Astro.props;
+const c = site.contacto;
+const redes = Object.entries(site.redes).filter(([, url]) => url);
+const anio = new Date().getFullYear();
+const segunda = c.whatsapp
+  ? { texto: 'WhatsApp', url: whatsapp(c.whatsapp, `Hola, os escribo desde la web de ${site.nombre}`), icono: 'whatsapp' }
+  : site.boton_cabecera?.url
+    ? { texto: site.boton_cabecera.texto, url: site.boton_cabecera.url, icono: '' }
+    : seccion('contacto')
+      ? { texto: 'Pedir precio', url: enlace('/#contacto'), icono: '' }
+      : null;
+---
+
+<footer class={`pie pie--${variante}`}>
+  <div class="contenedor">
+    <p class="pie-gigante">{site.nombre}</p>
+    {site.eslogan && <p class="pie-eslogan">{site.eslogan}</p>}
+    <div class="pie-columnas">
+      {
+        c.horario && (
+          <div>
+            <p class="pie-titulo">Horario</p>
+            <p class="pie-dato">{c.horario}</p>
+          </div>
+        )
+      }
+      {
+        c.direccion && (
+          <div>
+            <p class="pie-titulo">Dónde estamos</p>
+            <p class="pie-dato">
+              <a href={mapa(c.direccion)} rel="noopener" target="_blank">{c.direccion}</a>
+            </p>
+          </div>
+        )
+      }
+      {
+        (c.telefono || c.email || c.whatsapp) && (
+          <div>
+            <p class="pie-titulo">Contacto</p>
+            <ul class="pie-lista pie-dato">
+              {c.telefono && <li><a href={tel(c.telefono)}>{c.telefono}</a></li>}
+              {c.whatsapp && <li><a href={whatsapp(c.whatsapp)} rel="noopener" target="_blank">WhatsApp</a></li>}
+              {c.email && <li class="break-words"><a href={`mailto:${c.email}`}>{c.email}</a></li>}
+            </ul>
+          </div>
+        )
+      }
+      {
+        (site.menu.length > 0 || redes.length > 0) && (
+          <div>
+            {site.menu.length > 0 && (
+              <>
+                <p class="pie-titulo">En esta web</p>
+                <ul class="pie-lista">
+                  {site.menu.map((e) => <li><a href={e.url} {...fuera(e.url)}>{e.texto}</a></li>)}
+                </ul>
+              </>
+            )}
+            {redes.length > 0 && (
+              <ul class="pie-redes">
+                {redes.map(([red, url]) => (
+                  <li>
+                    <a href={url} rel="noopener" target="_blank" aria-label={red}>
+                      <Icono nombre={red} tam={20} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+      }
+    </div>
+  </div>
+  <div class="contenedor pie-legal">
+    <span>© {anio} {site.nombre}</span>
+    <a href="/aviso-legal">Aviso legal y privacidad</a>
+    {
+      site.marca_pie && (
+        <span class="pie-noexpertise">
+          Web creada con <a href="https://noexpertise.com" rel="noopener">NoExpertise</a>
+        </span>
+      )
+    }
+  </div>
+  {
+    (c.telefono || segunda) && (
+      <nav class="barra-movil" aria-label="Llamar o escribir">
+        {c.telefono && (
+          <a class="btn-sec" href={tel(c.telefono)}>
+            <Icono nombre="telefono" tam={18} /> Llamar
+          </a>
+        )}
+        {segunda && (
+          <a class="btn" href={segunda.url} {...fuera(segunda.url)}>
+            {segunda.icono && <Icono nombre={segunda.icono} tam={18} />} {segunda.texto}
+          </a>
+        )}
+      </nav>
+    )
+  }
+</footer>

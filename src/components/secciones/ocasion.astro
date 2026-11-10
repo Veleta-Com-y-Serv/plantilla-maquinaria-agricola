@@ -1,0 +1,95 @@
+---
+// «Maquinaria de ocasión»: cabeza con filete y, sobre un tablero de cuadrícula de 8 px, cada máquina (`maquinas`) como una
+// libreta impermeable: cabeza de tinta con el tipo (`categoria`) y el año, la foto, el nombre (enlaza a su página
+// /ocasion/<slug>/ si tiene `detalle`) y una línea, las celdas con marca, horas de motor, potencia y carga (solo las que
+// tengan valor), el estado como chip (verde «Disponible», mandarina «Reservada»), el precio bajo un filete doble y dos
+// teclas al pie (ver la ficha y preguntar por WhatsApp o en el contacto). Sin máquinas, el texto y el `cta`.
+import { seccion, site, whatsapp, fuera } from '../../data/site';
+import { enlaceDe } from '../../lib/paginas';
+import { altFicha } from '../../lib/seo';
+import { enlace } from '../../lib/multipagina';
+import Banda from '../ui/Banda.astro';
+import Titular from '../ui/Titular.astro';
+import Imagen from '../ui/Imagen.astro';
+import Icono from '../ui/Icono.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const c = site.contacto;
+const t = (v: unknown) => (v == null ? '' : String(v).trim());
+const CELDAS: [string, string][] = [['marca', 'Marca'], ['horas_motor', 'Horas de motor'], ['potencia', 'Potencia'], ['carga', 'Carga']];
+const CIFRAS = new Set(['horas_motor', 'potencia', 'carga']);
+const estadoClase = (e: string) => (/disponible|en venta|nuev/i.test(e) ? 'chip--verde' : /reserv/i.test(e) ? 'chip--acento' : '');
+const preguntar = (nombre: string) =>
+  c.whatsapp
+    ? { texto: 'Preguntar', url: whatsapp(c.whatsapp, `Hola, me interesa: ${nombre}`), icono: 'whatsapp' }
+    : { texto: 'Preguntar', url: enlace('/#contacto'), icono: 'correo' };
+---
+
+{
+  s && (
+    <Banda id={Astro.props.id} color="papel">
+      <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} cabeza />
+      {s.maquinas.length > 0 && (
+        <div class="tablero cuadricula">
+          <ul class="ocasiones">
+            {s.maquinas.map((m) => {
+              const url = enlaceDe(m);
+              const celdas = CELDAS.filter(([k]) => t(m[k]));
+              const p = preguntar(t(m.nombre));
+              return (
+                <li class="ocasion libreta">
+                  {(t(m.categoria) || t(m.anio)) && (
+                    <p class="libreta-cabeza">
+                      <span>{t(m.categoria)}</span>
+                      {t(m.anio) && <span class="cifra">{t(m.anio)}</span>}
+                    </p>
+                  )}
+                  {t(m.imagen) && (
+                    <div class="foto">
+                      <Imagen src={t(m.imagen)} alt={altFicha(m)} ancho={1400} alto={1050} />
+                    </div>
+                  )}
+                  <div class="ocasion-cuerpo">
+                    <h3>{url ? <a href={url}>{t(m.nombre)}</a> : t(m.nombre)}</h3>
+                    {t(m.texto) && <p class="ocasion-texto">{t(m.texto)}</p>}
+                  </div>
+                  {celdas.length > 0 && (
+                    <dl class="celdas cuadricula">
+                      {celdas.map(([k, etiqueta]) => (
+                        <div>
+                          <dt>{etiqueta}</dt>
+                          <dd class:list={{ cifra: CIFRAS.has(k) }}>{t(m[k])}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {(t(m.precio) || t(m.estado)) && (
+                    <p class="ocasion-total">
+                      {t(m.estado) ? <span class:list={['chip', estadoClase(t(m.estado))]}>{t(m.estado)}</span> : <span />}
+                      {t(m.precio) && <span class="ocasion-precio">{t(m.precio)}</span>}
+                    </p>
+                  )}
+                  <div class="teclas-pie">
+                    {url && <a href={url}>Ver la ficha</a>}
+                    <a href={p.url} {...fuera(p.url)}><Icono nombre={p.icono} tam={18} /> {p.texto}</a>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {s.cta?.url && (
+        <div class="pie-seccion">
+          <p class="menuda">{s.nota}</p>
+          <div class="botones"><a class="btn-sec" href={s.cta.url} {...fuera(s.cta.url)}>{s.cta.texto}</a></div>
+        </div>
+      )}
+    </Banda>
+  )
+}
+
+<style>
+  .ocasion > .teclas-pie { border-top: 0; }
+  .ocasion > .ocasion-cuerpo:last-child, .ocasion > .celdas:last-child { border-bottom: 0; }
+</style>

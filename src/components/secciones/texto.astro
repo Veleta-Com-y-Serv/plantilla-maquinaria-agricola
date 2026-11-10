@@ -1,0 +1,46 @@
+---
+// Apartado de texto genérico (`tipo: texto`): banda de papel a todo el ancho. Con `imagen`, foto a sangre a la izquierda y
+// el texto a la derecha; sin ella, cabeza con filete de tinta y párrafos a la derecha. `items` {titulo, texto} en dos
+// columnas con filetes y `cta` opcional.
+import { seccion, parrafos, fuera } from '../../data/site';
+import { altSeccion } from '../../lib/seo';
+import Titular from '../ui/Titular.astro';
+import Imagen from '../ui/Imagen.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+---
+
+{
+  s && (
+    <section id={Astro.props.id} class:list={['banda', 'banda--papel', { 'banda--sin-relleno': s.imagen }]}>
+      <div class:list={[s.imagen ? 'mitades mitades--foto-izq' : 'contenedor']}>
+        <div class:list={[s.imagen ? 'mitad-texto' : 'partido']}>
+          <Titular antetitulo={s.antetitulo} titulo={s.titulo} />
+          <div>
+            {parrafos(s.texto).length > 0 && <div class="parrafos">{parrafos(s.texto).map((p) => <p>{p}</p>)}</div>}
+            {s.items.length > 0 && (
+              <ul class="lista-marcas">
+                {s.items.map((it) => (
+                  <li>
+                    <p class="lista-titulo">{it.titulo}</p>
+                    {it.texto && <p class="lista-texto">{it.texto}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {s.cta?.url && <div class="botones"><a class="btn" href={s.cta.url} {...fuera(s.cta.url)}>{s.cta.texto}</a></div>}
+          </div>
+        </div>
+        {s.imagen && (
+          <div class="mitad-foto foto foto--sangre">
+            <Imagen src={s.imagen} alt={altSeccion(s)} ancho={1400} alto={1050} />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .mitad-texto .parrafos { margin-top: 1.5rem; }
+</style>

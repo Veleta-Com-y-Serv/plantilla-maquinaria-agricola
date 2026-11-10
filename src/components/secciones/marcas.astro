@@ -1,0 +1,55 @@
+---
+// «Marcas»: cabeza con filete de tinta y las `marcas` como índice con filetes en la hoja blanca (Range de Furrow «el libro
+// como índice»): nombre en Red Hat Display, qué máquinas (`gama`), qué sois para ella (`relacion`, como chip: verde si es
+// «oficial») y una línea (`texto`). Sin logotipos: las marcas van en letra. En móvil cada fila se apila. Sin marcas, solo
+// la cabeza (y nada si tampoco hay título).
+import { seccion } from '../../data/site';
+import Banda from '../ui/Banda.astro';
+import Titular from '../ui/Titular.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const marcas = s?.marcas ?? [];
+const conGama = marcas.some((m) => m.gama);
+const conRelacion = marcas.some((m) => m.relacion);
+const conTexto = marcas.some((m) => m.texto);
+const oficial = (t: string) => /oficial/i.test(t);
+---
+
+{
+  s && (s.titulo || marcas.length > 0) && (
+    <Banda id={Astro.props.id} color="papel">
+      <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} cabeza />
+      {marcas.length > 0 && (
+        <div class="hoja">
+          <table class="indice">
+            <caption class="sr-only">{s.titulo || 'Marcas'}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Marca</th>
+                {conGama && <th scope="col">Qué máquinas</th>}
+                {conRelacion && <th scope="col">Qué somos</th>}
+                {conTexto && <th scope="col"><span class="sr-only">Detalle</span></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {marcas.map((m) => (
+                <tr>
+                  <th scope="row" class="indice-nombre">{m.nombre}</th>
+                  {conGama && <td class="indice-gama">{m.gama}</td>}
+                  {conRelacion && <td class="indice-relacion">{m.relacion && <span class:list={['chip', { 'chip--verde': oficial(m.relacion) }]}>{m.relacion}</span>}</td>}
+                  {conTexto && <td class="indice-texto">{m.texto}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Banda>
+  )
+}
+
+<style>
+  .indice tbody th { padding: 1.1rem 1.5rem 1.1rem 0; text-align: left; vertical-align: baseline; }
+  @media (max-width: 47.99rem) { .indice tbody th { padding: 0; } }
+  @media (min-width: 48rem) { .indice tbody th { width: 22%; } .indice-relacion { width: 1%; white-space: nowrap; } }
+</style>

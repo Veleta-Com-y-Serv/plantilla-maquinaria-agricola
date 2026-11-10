@@ -1,0 +1,75 @@
+---
+// «Contacto»: banda de hoja partida: a la izquierda el titular con filete de tinta, las vías (teléfono, WhatsApp, email y
+// dirección) en filas con su tecla de icono y el `horario` {dia, horas} en una tabla con filetes (sin él, el horario de
+// contacto en una línea); a la derecha el formulario (mailto) dentro de una libreta con la cabeza de tinta, con el
+// desplegable «Producto de interés» relleno con las máquinas de ocasión y las familias de maquinaria nueva.
+import { seccion, site, tel, whatsapp, mapa, buscarSeccion } from '../../data/site';
+import Titular from '../ui/Titular.astro';
+import Icono from '../ui/Icono.astro';
+import Banda from '../ui/Banda.astro';
+import FormularioContacto from '../ui/FormularioContacto.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const c = site.contacto;
+const vias = [
+  c.telefono && { etiqueta: 'Teléfono', dato: c.telefono, url: tel(c.telefono), icono: 'telefono', fuera: false },
+  c.whatsapp && { etiqueta: 'WhatsApp', dato: c.whatsapp, url: whatsapp(c.whatsapp, `Hola, os escribo desde la web de ${site.nombre}`), icono: 'whatsapp', fuera: true },
+  c.email && { etiqueta: 'Email', dato: c.email, url: `mailto:${c.email}`, icono: 'correo', fuera: false },
+  c.direccion && { etiqueta: 'Dirección', dato: c.direccion, url: mapa(c.direccion), icono: 'mapa', fuera: true },
+].filter(Boolean) as { etiqueta: string; dato: string; url: string; icono: string; fuera: boolean }[];
+const productos = [
+  ...(buscarSeccion('ocasion')?.s.maquinas ?? []).map((m) => String(m.nombre ?? '').trim()),
+  ...(buscarSeccion('maquinaria')?.s.items ?? []).map((it) => String(it.titulo ?? '').trim()),
+].filter((p, i, a) => p && a.indexOf(p) === i);
+const boton = s?.cta?.texto || 'Enviar consulta';
+---
+
+{
+  s && (
+    <Banda id={Astro.props.id} color="papel">
+      <div class="contacto-rejilla">
+        <div>
+          <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} />
+          {vias.length > 0 && (
+            <ul class="vias">
+              {vias.map((v) => (
+                <li>
+                  <a href={v.url} {...(v.fuera ? { rel: 'noopener', target: '_blank' } : {})}>
+                    <span class="vias-icono"><Icono nombre={v.icono} tam={20} /></span>
+                    <span class="min-w-0">
+                      <span class="menuda block">{v.etiqueta}</span>
+                      <span class="vias-dato">{v.dato}</span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          {s.horario.length > 0 ? (
+            <table class="horario">
+              <caption class="menuda">Horario</caption>
+              <tbody>
+                {s.horario.map((h) => (
+                  <tr><th scope="row">{h.dia}</th><td>{h.horas}</td></tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            c.horario && <p class="horario-suelto"><span class="menuda block">Horario</span>{c.horario}</p>
+          )}
+        </div>
+        <div class="libreta formulario-libreta">
+          <p class="libreta-cabeza"><span><Icono nombre="correo" tam={16} /> {boton}</span></p>
+          <div class="cuadricula">
+            <FormularioContacto boton={boton} productos={productos} />
+          </div>
+        </div>
+      </div>
+    </Banda>
+  )
+}
+
+<style>
+  .horario-suelto { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--tinta); color: var(--tinta); }
+  .formulario-libreta .formulario { background: transparent; }
+</style>

@@ -1,0 +1,120 @@
+# Metadatos de la plantilla para el catálogo de NoExpertise.
+id: maquinaria-agricola
+nombre: Maquinaria agrícola y taller
+descripcion: "Para concesionarios y talleres agrícolas: marcas, ocasión con precio, recambios y servicio en el campo."
+sectores:
+  - { id: maquinaria-agricola, nombre: Maquinaria agrícola }
+  - { id: taller-agricola, nombre: Taller agrícola }
+  - { id: maquinaria-jardin, nombre: Maquinaria forestal y de jardín }
+  - { id: suministros-agricolas, nombre: Suministros agrícolas y ganaderos }
+  - maquinaria
+secciones:
+  - { id: hero, nombre: Portada }
+  - { id: marcas, nombre: Marcas }
+  - { id: maquinaria, nombre: Maquinaria nueva }
+  - { id: recambios, nombre: Recambios y suministros }
+  - { id: ocasion, nombre: Maquinaria de ocasión }
+  - { id: taller, nombre: Taller }
+  - { id: zonas, nombre: Servicio en el campo }
+  - { id: preguntas, nombre: Preguntas frecuentes }
+  - { id: contacto, nombre: Contacto }
+estilo: furrow
+plan_minimo: gratis
+version: 1.0.0
+base: astrowind
+demo_url: https://demo-plantilla-maquinaria-agricola.noexpertise.com
+activa: true
+orden: 770
+
+# Fichas por elemento (docs/plantillas.md § Fichas por elemento): cada máquina de ocasión con `detalle` tiene su página en
+# /ocasion/<slug>/, y cada zona con `texto`, la suya en /zonas/<slug>/. Espejo en src/data/fichas.ts.
+fichas:
+  - { lista: ocasion, campo: maquinas, ruta: ocasion, nombre: Máquina de ocasión, tipo: Product }
+zonas:
+  ruta: zonas
+
+# Varias páginas (docs/plantillas.md § Varias páginas): reparto recomendado al activar «Varias páginas».
+# Inicio se queda con la portada y lo que no esté en ninguna página (aquí, las marcas).
+paginas:
+  - { ruta: maquinaria, titulo: Maquinaria, secciones: "maquinaria; recambios" }
+  - { ruta: ocasion, titulo: Ocasión, secciones: "ocasion" }
+  - { ruta: taller, titulo: Taller, secciones: "taller; zonas" }
+  - { ruta: contacto, titulo: Contacto, secciones: "preguntas; contacto" }
+
+# Asistente de puesta en marcha (NoExpertise): un paso por pantalla. Rutas del site sin índices;
+# tipos: texto y lista (la IA propone), datos, fotos, eleccion (colores y logo) y repaso.
+asistente:
+  - id: negocio
+    titulo: "Tu negocio"
+    pregunta: "¿Cómo se llama tu concesionario o taller y qué hacéis?"
+    ayuda: "Por ejemplo: concesionario de tractores con taller propio, venta de aperos y recambios, servicio en el campo en campaña, y en qué pueblo estáis."
+    tipo: texto
+    campos: [nombre, eslogan, seo.titulo, seo.descripcion, secciones.hero.antetitulo, secciones.hero.titulo, secciones.hero.texto]
+  - id: contacto
+    titulo: "Cómo te encuentran"
+    pregunta: "¿Dónde está el taller y cómo os pueden llamar o escribir?"
+    ayuda: "Solo lo que quieras que vean tus clientes. Si contestáis por WhatsApp, ponlo: saldrá un botón para mandar la avería o pedir una pieza."
+    tipo: datos
+    campos: [contacto.telefono, contacto.whatsapp, contacto.email, contacto.direccion, contacto.horario, redes.instagram, redes.facebook]
+  - id: marcas
+    titulo: "Tus marcas"
+    pregunta: "¿Qué marcas vendéis o reparáis? Una por línea: la marca, qué máquinas son y si sois concesionario oficial, distribuidor o servicio técnico."
+    ayuda: "Por ejemplo: «Tractores de 75 a 180 CV, concesionario oficial» o «Motosierras y desbrozadoras, servicio oficial». Pon solo marcas con las que trabajéis de verdad."
+    tipo: lista
+    campos: [secciones.marcas.marcas]
+  - id: maquinaria
+    titulo: "Maquinaria nueva"
+    pregunta: "¿Qué tipos de máquinas nuevas vendéis? Uno por línea, con lo que incluye."
+    ayuda: "Por ejemplo: tractores de viñedo y de campo abierto, aperos y siembra, remolques y cisternas, forestal y jardín, riego. Luego puedes poner una foto de cada uno."
+    tipo: lista
+    campos: [secciones.maquinaria.items]
+  - id: ocasion
+    titulo: "Maquinaria de ocasión"
+    pregunta: "¿Qué máquinas de segunda mano tenéis ahora? Una por línea: qué es, la marca, el año, las horas, la potencia y el precio si quieres."
+    ayuda: "Por ejemplo: «Tractor de 110 CV, 2016, 6.200 horas, 38.500 €». Si una está reservada, dilo. Luego puedes poner su foto y contar más de cada una."
+    tipo: lista
+    campos: [secciones.ocasion.maquinas]
+  - id: recambios
+    titulo: "Recambios y suministros"
+    pregunta: "¿Qué recambios y suministros tenéis en la tienda? Uno por línea."
+    ayuda: "Por ejemplo: filtros y aceites, neumáticos agrícolas, cuchillas y rejas, material de riego, cercados y bebederos, ropa de trabajo. Si no vendéis recambios, salta este paso."
+    tipo: lista
+    campos: [secciones.recambios.items]
+  - id: taller
+    titulo: "Tu taller y el campo"
+    pregunta: "¿Qué reparáis en el taller? ¿Y salís a reparar a las fincas, hasta dónde y cuándo?"
+    ayuda: "Por ejemplo: revisión antes de campaña, hidráulica, electricidad, afilado de cadenas; todas las marcas y precio antes de empezar; furgoneta taller con recambios, en campaña también los sábados."
+    tipo: texto
+    campos: [secciones.taller.titulo, secciones.taller.texto, secciones.taller.items, secciones.zonas.titulo, secciones.zonas.texto, secciones.zonas.aviso.titulo, secciones.zonas.aviso.texto]
+  - id: zonas
+    titulo: "Pueblos donde trabajáis"
+    pregunta: "¿A qué pueblos o comarcas vais? Uno por línea, empezando por el vuestro."
+    ayuda: "Saldrán en el plano de tu web. Si cuentas algo de cada pueblo (qué hacéis allí, qué cultivos hay), tendrá su propia página y te encontrarán mejor en Google."
+    tipo: lista
+    campos: [secciones.zonas.items]
+  - id: horario
+    titulo: "Horario"
+    pregunta: "¿Qué días y a qué horas abrís el taller y la tienda?"
+    ayuda: "Por ejemplo: de lunes a viernes de 8:00 a 13:30 y de 15:30 a 19:00; sábados por la mañana; en campaña, también sábados por la tarde."
+    tipo: lista
+    campos: [secciones.contacto.horario]
+  - id: preguntas
+    titulo: "Preguntas frecuentes"
+    pregunta: "¿Qué os preguntan más en el mostrador o por teléfono? Escribe cada pregunta y lo que respondéis."
+    ayuda: "Por ejemplo: si reparáis otras marcas, si os quedáis el tractor viejo como parte del pago, qué garantía tiene la ocasión o si se puede pagar a plazos."
+    tipo: lista
+    campos: [secciones.preguntas.preguntas]
+  - id: fotos
+    titulo: "Tus fotos"
+    pregunta: "Pon una foto de portada y, si quieres, la del taller, la de cada tipo de máquina y las de tu maquinaria de ocasión."
+    ayuda: "Sube las tuyas o elige una del banco. Las máquinas quedan mejor a la luz del día, enteras y con la campa o la nave detrás. Las que no cambies se quedan como están."
+    tipo: fotos
+    campos: [secciones.hero.imagen, secciones.taller.imagen, secciones.zonas.imagen]
+  - id: aspecto
+    titulo: "Colores y logo"
+    pregunta: "Elige los colores de tu web y, si tienes, tu logo."
+    tipo: eleccion
+    campos: [colores.primario, colores.acento, logo]
+  - id: repaso
+    titulo: "Repaso"
+    tipo: repaso

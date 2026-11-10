@@ -1,0 +1,181 @@
+---
+// Layout base de la plantilla. NO TOCAR salvo orden explícita de diseño.
+// Pone el idioma, las metas SEO (src/lib/seo.ts: canónica, og, robots y JSON-LD), los colores de site.yaml como variables CSS,
+// la fuente de titulares precargada (alojada en public/fuentes, sin servicios externos), la cabecera, el pie y el script
+// pequeño que dibuja el plano de curvas de nivel en los `.plano[data-plano]` (tema Furrow: nunca una foto ni un mapa real).
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { altHero, canonica, imagenCompartir, imagenCompartirDe, indexable, jsonLdNegocio, jsonLdPreguntas, jsonSeguro, urlBase } from '../lib/seo';
+
+interface Props { titulo?: string; descripcion?: string; imagen?: string; ld?: (Record<string, unknown> | null)[] }
+const { titulo, descripcion, imagen: foto, ld: ldPagina = [] } = Astro.props;
+
+const VARIANTE_CABECERA = 'surco';
+const VARIANTE_PIE = 'surco';
+
+const title = titulo ? `${titulo} · ${site.nombre}` : site.seo.titulo;
+const description = descripcion ?? site.seo.descripcion;
+const c = site.colores;
+const variables = `--c-primario:${c.primario};--c-acento:${c.acento};--c-fondo:${c.fondo};--c-texto:${c.texto}`;
+// SEO de base (src/lib/seo.ts): dirección canónica (seo.url o SITE_URL), foto para compartir, indexación y JSON-LD.
+const base = urlBase(Astro.site);
+const canonical = canonica(Astro.url.pathname, base);
+const imagen = foto ? imagenCompartirDe(foto, base) : imagenCompartir(base);
+const ld = jsonLdNegocio(base, 'AutomotiveBusiness');
+const ldPreguntas = jsonLdPreguntas(Astro.url.pathname);
+---
+
+<!doctype html>
+<html lang="es-ES" style={variables}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content={c.fondo} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fuentes/red-hat-display-600.woff2" as="font" type="font/woff2" crossorigin />
+    {!indexable() && <meta name="robots" content="noindex, nofollow" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content={site.nombre} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {imagen && <meta property="og:image" content={imagen} />}
+    {imagen && <meta property="og:image:alt" content={foto && titulo ? titulo : altHero()} />}
+    <meta name="twitter:card" content={imagen ? 'summary_large_image' : 'summary'} />
+    <script type="application/ld+json" set:html={jsonSeguro(ld)} />
+    {ldPreguntas && <script type="application/ld+json" set:html={jsonSeguro(ldPreguntas)} />}
+    {ldPagina.filter(Boolean).map((o) => <script type="application/ld+json" set:html={jsonSeguro(o)} />)}
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    <Header variante={VARIANTE_CABECERA} cta={site.boton_cabecera} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Footer variante={VARIANTE_PIE} />
+    <script is:inline>
+      // El plano: curvas de nivel generadas (marching squares sobre ruido) con los colores de la web. Tipos:
+      // «curvas» (solo curvas, portada), «fragmento» (curvas del color del texto, banda mandarina) y «completo»
+      // (curvas, río, camino, setos, el área de servicio en mandarina alrededor de las chinchetas, la ruta y dos pliegues).
+      (function () {
+        function azar(a) { return function () { a |= 0; a = (a + 0x6d2b79f5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+        function ruido(r, w, h, celda) {
+          var cx = Math.ceil(w / celda) + 2, cy = Math.ceil(h / celda) + 2, g = new Float32Array(cx * cy);
+          for (var i = 0; i < g.length; i++) g[i] = r();
+          return function (x, y) {
+            var gx = x / celda, gy = y / celda, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+            fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+            var a = g[iy * cx + ix], b = g[iy * cx + ix + 1], c = g[(iy + 1) * cx + ix], d = g[(iy + 1) * cx + ix + 1];
+            return a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy;
+          };
+        }
+        var SEG = { 1: [3, 2], 2: [2, 1], 3: [3, 1], 4: [0, 1], 5: [3, 0, 2, 1], 6: [0, 2], 7: [3, 0], 8: [3, 0], 9: [0, 2], 10: [3, 2, 0, 1], 11: [0, 1], 12: [3, 1], 13: [2, 1], 14: [3, 2] };
+        function curvas(x, w, h, r, color, fuerte, alfa) {
+          var f1 = ruido(r, w, h, 190), f2 = ruido(r, w, h, 64), paso = w < 640 ? 6 : 8;
+          var nx = Math.ceil(w / paso) + 1, ny = Math.ceil(h / paso) + 1, v = new Float32Array(nx * ny), i, j, k;
+          for (j = 0; j < ny; j++) for (i = 0; i < nx; i++) v[j * nx + i] = f1(i * paso, j * paso) * 0.8 + f2(i * paso, j * paso) * 0.2;
+          var p = [[0, 0], [0, 0], [0, 0], [0, 0]];
+          for (k = 1; k < 24; k++) {
+            var l = k / 24; x.beginPath();
+            for (j = 0; j < ny - 1; j++) for (i = 0; i < nx - 1; i++) {
+              var a = v[j * nx + i], b = v[j * nx + i + 1], c = v[(j + 1) * nx + i + 1], d = v[(j + 1) * nx + i];
+              var n = (a > l ? 8 : 0) | (b > l ? 4 : 0) | (c > l ? 2 : 0) | (d > l ? 1 : 0);
+              if (n === 0 || n === 15) continue;
+              var X = i * paso, Y = j * paso;
+              p[0][0] = X + paso * ((l - a) / (b - a || 1)); p[0][1] = Y;
+              p[1][0] = X + paso; p[1][1] = Y + paso * ((l - b) / (c - b || 1));
+              p[2][0] = X + paso * ((l - d) / (c - d || 1)); p[2][1] = Y + paso;
+              p[3][0] = X; p[3][1] = Y + paso * ((l - a) / (d - a || 1));
+              var s = SEG[n];
+              for (var m = 0; m < s.length; m += 2) { x.moveTo(p[s[m]][0], p[s[m]][1]); x.lineTo(p[s[m + 1]][0], p[s[m + 1]][1]); }
+            }
+            var gruesa = k % 5 === 0;
+            x.globalAlpha = alfa * (gruesa ? 1 : 0.62); x.strokeStyle = gruesa ? fuerte : color; x.lineWidth = gruesa ? 1.3 : 0.8; x.stroke();
+          }
+          x.globalAlpha = 1;
+        }
+        function envolvente(pts) {
+          pts = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+          function giro(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+          var lo = [], hi = [], i;
+          for (i = 0; i < pts.length; i++) { while (lo.length >= 2 && giro(lo[lo.length - 2], lo[lo.length - 1], pts[i]) <= 0) lo.pop(); lo.push(pts[i]); }
+          for (i = pts.length - 1; i >= 0; i--) { while (hi.length >= 2 && giro(hi[hi.length - 2], hi[hi.length - 1], pts[i]) <= 0) hi.pop(); hi.push(pts[i]); }
+          return lo.slice(0, -1).concat(hi.slice(0, -1));
+        }
+        function suave(x, pts) {
+          var n = pts.length; x.beginPath();
+          x.moveTo((pts[n - 1][0] + pts[0][0]) / 2, (pts[n - 1][1] + pts[0][1]) / 2);
+          for (var i = 0; i < n; i++) { var q = pts[(i + 1) % n]; x.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + q[0]) / 2, (pts[i][1] + q[1]) / 2); }
+          x.closePath();
+        }
+        function dibujar(el) {
+          var cv = el.querySelector('canvas'); if (!cv) return;
+          var w = el.clientWidth, h = el.clientHeight; if (!w || !h) return;
+          var dpr = Math.min(window.devicePixelRatio || 1, 2); cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+          var x = cv.getContext('2d'); if (!x) return;
+          x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+          var cs = getComputedStyle(el), v = function (n) { return cs.getPropertyValue(n).trim(); };
+          var tipo = el.getAttribute('data-plano'), r = azar(+el.getAttribute('data-semilla') || 7);
+          if (tipo === 'fragmento') { curvas(x, w, h, r, cs.color, cs.color, 0.32); return; }
+          curvas(x, w, h, r, v('--curva'), v('--curva-fuerte'), 1);
+          if (tipo !== 'completo') return;
+          var caja = el.getBoundingClientRect(), pts = [];
+          el.querySelectorAll('.chincheta-marca').forEach(function (m) { var b = m.getBoundingClientRect(); pts.push([b.left + b.width / 2 - caja.left, b.top + b.height / 2 - caja.top]); });
+          var base = pts[0] || [w * 0.36, h * 0.5];
+          // Río
+          x.beginPath(); var y0 = h * (0.78 + r() * 0.14); x.moveTo(-10, y0);
+          x.bezierCurveTo(w * 0.3, y0 - h * (0.05 + r() * 0.2), w * 0.55, h * (0.75 + r() * 0.2), w + 10, h * (0.45 + r() * 0.3));
+          x.strokeStyle = v('--agua'); x.lineWidth = 3.5; x.stroke();
+          // Camino hasta el taller (dos filetes)
+          x.beginPath(); x.moveTo(-10, h * (0.18 + r() * 0.2)); x.quadraticCurveTo(base[0] * 0.5, base[1] * 0.75, base[0], base[1]);
+          x.strokeStyle = v('--tinta'); x.globalAlpha = 0.55; x.lineWidth = 6; x.stroke();
+          x.globalAlpha = 1; x.strokeStyle = v('--papel'); x.lineWidth = 4; x.stroke();
+          // Setos (punteados) entre parcelas
+          x.setLineDash([1, 4.5]); x.lineCap = 'round'; x.strokeStyle = v('--seto'); x.lineWidth = 2;
+          for (var s = 0; s < 9; s++) {
+            var px = w * (0.05 + r() * 0.62), py = h * (0.08 + r() * 0.84); x.beginPath(); x.moveTo(px, py);
+            for (var t = 0; t < 3; t++) { if (t % 2) py += (r() - 0.5) * h * 0.35; else px += (r() - 0.5) * w * 0.3; x.lineTo(px, py); }
+            x.stroke();
+          }
+          x.setLineDash([]);
+          // El área de servicio, filetada en mandarina como una finca en un plano de registro
+          var acento = v('--c-acento'), area;
+          if (pts.length >= 3) {
+            var cx = 0, cy = 0; pts.forEach(function (q) { cx += q[0]; cy += q[1]; }); cx /= pts.length; cy /= pts.length;
+            area = envolvente(pts).map(function (q) { var dx = q[0] - cx, dy = q[1] - cy, d = Math.hypot(dx, dy) || 1, e = Math.min(70, 40 + d * 0.15); return [Math.max(8, Math.min(w - 8, q[0] + dx / d * e)), Math.max(8, Math.min(h - 8, q[1] + dy / d * e))]; });
+            suave(x, area);
+          } else { x.beginPath(); x.ellipse(base[0], base[1], w * 0.24, h * 0.3, 0, 0, Math.PI * 2); }
+          x.strokeStyle = acento; x.globalAlpha = 0.2; x.lineWidth = 12; x.stroke();
+          x.globalAlpha = 1; x.lineWidth = 2.5; x.stroke();
+          // Ruta de la furgoneta: del taller a la segunda zona
+          if (pts[1]) {
+            x.beginPath(); x.moveTo(base[0], base[1]);
+            x.quadraticCurveTo((base[0] + pts[1][0]) / 2 + 30, (base[1] + pts[1][1]) / 2 - 30, pts[1][0], pts[1][1]);
+            x.setLineDash([5, 5]); x.strokeStyle = v('--tinta'); x.lineWidth = 1.5; x.stroke(); x.setLineDash([]);
+          }
+          // Grano del papel y dos pliegues (solo dentro del plano)
+          x.fillStyle = v('--tinta');
+          for (var g = 0; g < (w * h) / 900; g++) { x.globalAlpha = 0.03 + r() * 0.04; x.fillRect(r() * w, r() * h, 1, 1); }
+          [[w * 0.5, 0, w * 0.5, h], [0, h * 0.46, w, h * 0.46]].forEach(function (q) {
+            x.globalAlpha = 0.07; x.strokeStyle = v('--tinta'); x.lineWidth = 1; x.beginPath(); x.moveTo(q[0] + 1, q[1] + 1); x.lineTo(q[2] + 1, q[3] + 1); x.stroke();
+            x.globalAlpha = 0.8; x.strokeStyle = v('--papel-2'); x.beginPath(); x.moveTo(q[0], q[1]); x.lineTo(q[2], q[3]); x.stroke();
+          });
+          x.globalAlpha = 1;
+        }
+        function todos() { document.querySelectorAll('.plano[data-plano]').forEach(dibujar); }
+        var espera;
+        function luego() { clearTimeout(espera); espera = setTimeout(todos, 160); }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', todos); else todos();
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(todos);
+        var ancho = window.innerWidth;
+        window.addEventListener('resize', function () { if (window.innerWidth !== ancho) { ancho = window.innerWidth; luego(); } }, { passive: true });
+      })();
+    </script>
+  </body>
+</html>

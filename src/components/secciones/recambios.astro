@@ -1,0 +1,47 @@
+---
+// «Recambios y suministros»: la banda mandarina (Range de Furrow «la cuenta sobre la tierra»): un trozo de plano con curvas
+// de nivel detrás, a la izquierda el titular, la `nota` y las teclas (el `cta` en tinta y, si hay WhatsApp, «Por WhatsApp»
+// con el mensaje preparado); a la derecha los `items` {titulo, texto} como filas con filetes. El texto sobre la mandarina
+// se elige solo (claro u oscuro según el color del cliente).
+import { seccion, site, whatsapp, fuera, semilla } from '../../data/site';
+import Titular from '../ui/Titular.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const c = site.contacto;
+const wa = c.whatsapp ? whatsapp(c.whatsapp, 'Hola, necesito una pieza. Marca, modelo y referencia: ') : '';
+---
+
+{
+  s && (s.titulo || s.items.length > 0) && (
+    <section id={Astro.props.id} class="banda banda--acento">
+      <div class="plano" data-plano="fragmento" data-semilla={semilla(site.nombre + 'recambios')} aria-hidden="true"><canvas /></div>
+      <div class="contenedor campo-banda">
+        <div>
+          <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} />
+          {s.nota && <p class="nota menuda">{s.nota}</p>}
+          {(s.cta?.url || wa) && (
+            <div class="botones">
+              {s.cta?.url && <a class="btn" href={s.cta.url} {...fuera(s.cta.url)}>{s.cta.texto}</a>}
+              {wa && <a class="btn-sec" href={wa} rel="noopener" target="_blank">Por WhatsApp</a>}
+            </div>
+          )}
+        </div>
+        {s.items.length > 0 && (
+          <ul class="filas">
+            {s.items.map((it) => (
+              <li>
+                <p class="filas-titulo">{it.titulo}</p>
+                {it.texto && <p class="filas-texto">{it.texto}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .banda--acento .plano { -webkit-mask-image: linear-gradient(90deg, transparent 10%, var(--mascara) 70%); mask-image: linear-gradient(90deg, transparent 10%, var(--mascara) 70%); }
+  .banda--acento .nota { font-size: .95rem; }
+</style>

@@ -1,0 +1,24 @@
+---
+// Imagen con carga diferida por defecto. `prioridad` para la de la portada (se carga al momento).
+// Si una foto de /fotos/ todavía no existe o falla, se queda el fondo de su marco (papel manila).
+interface Props { src?: string; alt?: string; ancho?: number; alto?: number; class?: string; prioridad?: boolean }
+const { src, alt = '', ancho = 800, alto = 600, class: clase = '', prioridad = false } = Astro.props;
+// `alt` vacío = foto decorativa (también aria-hidden). Las de contenido llevan su alt (src/lib/seo.ts: altHero, altFicha…).
+---
+
+{
+  src && (
+    <img
+      src={src}
+      alt={alt}
+      aria-hidden={alt === '' ? 'true' : undefined}
+      width={ancho}
+      height={alto}
+      class={clase}
+      loading={prioridad ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={prioridad ? 'high' : undefined}
+      onerror="this.onerror=null;this.style.visibility='hidden'"
+    />
+  )
+}

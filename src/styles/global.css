@@ -1,0 +1,457 @@
+/* Hallmark · shape: Catálogo de campo con bandas (concesionario y taller) · genre: modern-minimal · theme: Furrow (by request) · job: llamar al taller + pedir precio · draw: manual (plantilla NoExpertise)
+ * hero: Stage (texto a la izquierda sobre el plano de curvas de nivel, foto a sangre a la derecha y la libreta del taller encima) · nav: edge-aligned fija con el teléfono y una tecla · footer: mast en banda de tinta · imagery: photographs generadas para la plantilla, natural con=8 sat=-6 · signature: la comarca en el plano (las zonas como chinchetas sobre curvas de nivel generadas, el área de servicio filetada en mandarina y la libreta de avería encima)
+ * axes: light/grotesk/warm · posture: committed (banda mandarina de recambios y banda primaria del taller) · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P2 H2 E2 S2 R2 V2 · weakest: R (cabeza + cuerpo en varias secciones), alternando foto, índice en hoja blanca, libretas sobre cuadrícula, campo mandarina y plano */
+/* waive 54/67: el campo `antetitulo` es contrato de NoExpertise; se pinta como etiqueta de Red Hat Text en caja normal, sin versalitas. */
+/* waive 48: los literales del bloque :root son respaldos de color-mix con blanco y el matiz del agua del plano; los de comun.css (común a todas las plantillas) y el style de <html> con los cuatro colores del cliente son contrato de NoExpertise. */
+/* waive 20: el CSS se sirve en línea y Tailwind antepone su cabecera; el sello es la primera línea de este fichero fuente. */
+/* waive 48 (comun.css): la sombra de .menu-movil-panel y las mayúsculas de .pie-titulo vienen de comun.css (común a todas las plantillas) y se anulan aquí. */
+/* waive 19: el guion «—» es la opción vacía del desplegable de FormularioContacto.astro, cuyo marcado es contrato. */
+/* waive F4: la segunda tecla es la tecla blanca moldeada del tema Furrow (borde de filete), no un segundo relleno de color. */
+/* waive 58: Hallmark pide unas 450 palabras; una web de concesionario con marcas, ocasión, zonas y preguntas pasa de 1000 y es contenido que el cliente necesita. */
+/*
+ * Maquinaria agrícola y taller (NoExpertise), tema Furrow: papel manila, tinta casi negra, Red Hat Display 600 en
+ * titulares sobre Red Hat Text, Red Hat Mono solo para cifras que se copian (teléfonos, años, horas de motor), teclas
+ * moldeadas de 6 px, la libreta impermeable con cabeza de tinta y celdas sobre cuadrícula de 8 px, el plano de curvas
+ * de nivel generado en un canvas, una señal mandarina (relleno con tinta encima) y el verde de «disponible».
+ * Todo sale de las cuatro variables de color de site.yaml:
+ *   --c-fondo = papel · --c-texto = tinta · --c-acento = mandarina (tecla principal, foco, borde del área, banda de recambios)
+ *   --c-primario = banda fuerte (taller) y el verde de «disponible».
+ * Los demás tonos se derivan con color-mix() u oklch(from …): la web sigue legible si el cliente cambia los colores.
+ */
+@import "tailwindcss";
+@import "./comun.css";
+@config "../../tailwind.config.mjs";
+
+@font-face { font-family: "Red Hat Display"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fuentes/red-hat-display-600.woff2") format("woff2"); }
+@font-face { font-family: "Red Hat Text"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fuentes/red-hat-text-400.woff2") format("woff2"); }
+@font-face { font-family: "Red Hat Text"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fuentes/red-hat-text-500.woff2") format("woff2"); }
+@font-face { font-family: "Red Hat Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fuentes/red-hat-mono-400.woff2") format("woff2"); }
+
+:root {
+  --fuente-titulos: "Red Hat Display", "Red Hat Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-texto: "Red Hat Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-cifras: "Red Hat Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --ancho: 90rem; --ritmo: 4.5rem; --ritmo-md: 6rem; --ritmo-lg: 7.5rem;
+  --alto-cabecera: 4rem;
+  --radio: 6px; --radio-tarjeta: 10px; --radio-libreta: 14px; --radio-tecla: 6px; --radio-hoja: 3px;
+  --dur-micro: 120ms; --dur-corta: 220ms; --salida: cubic-bezier(.2, .7, .2, 1);
+
+  /* Papel, tinta y filetes (derivados: siguen funcionando con los colores del cliente) */
+  --papel: var(--c-fondo);
+  --papel-2: color-mix(in oklab, var(--c-fondo) 32%, #fff);          /* la hoja blanca y la libreta */
+  --papel-3: color-mix(in oklab, var(--c-fondo) 91%, var(--c-texto)); /* manila más oscuro */
+  --tinta: var(--c-texto);
+  --tinta-2: color-mix(in oklab, var(--c-texto) 88%, var(--c-fondo));
+  --apagado: color-mix(in oklab, var(--c-texto) 70%, var(--c-fondo));
+  --filete: color-mix(in oklab, var(--c-texto) 14%, var(--c-fondo));
+  --rejilla: color-mix(in oklab, var(--c-texto) 6%, var(--papel-2));
+  /* Mandarina (siempre relleno con tinta encima, nunca letra) y verde de «disponible» */
+  --acento-suave: color-mix(in oklab, var(--c-acento) 22%, var(--papel-2));
+  --acento-borde: color-mix(in oklab, var(--c-acento) 78%, var(--c-texto));
+  --acento-hover: color-mix(in oklab, var(--c-acento) 88%, var(--c-texto));
+  --foco: color-mix(in oklab, var(--c-acento) 82%, var(--c-texto));
+  --verde: color-mix(in oklab, var(--c-primario) 88%, var(--c-texto));
+  --verde-suave: color-mix(in oklab, var(--c-primario) 14%, var(--papel-2));
+  /* El plano: curvas de nivel en siena, setos en verde, agua en pizarra */
+  --curva: color-mix(in oklab, color-mix(in oklab, var(--c-acento) 55%, var(--c-texto)) 42%, var(--c-fondo));
+  --curva-fuerte: color-mix(in oklab, color-mix(in oklab, var(--c-acento) 55%, var(--c-texto)) 62%, var(--c-fondo));
+  --seto: color-mix(in oklab, var(--c-primario) 70%, var(--c-fondo));
+  --agua: color-mix(in oklab, #5f7f94 70%, var(--c-fondo));
+  /* Sombras de la libreta y de la hoja (tinta con transparencia) */
+  --sombra-hoja: 0 1px 2px color-mix(in oklab, var(--c-texto) 8%, transparent), 0 14px 28px -16px color-mix(in oklab, var(--c-texto) 28%, transparent);
+  --sombra-libreta: 0 1px 1px color-mix(in oklab, var(--c-texto) 10%, transparent), 0 2px 4px -1px color-mix(in oklab, var(--c-texto) 10%, transparent), 0 24px 44px -20px color-mix(in oklab, var(--c-texto) 42%, transparent);
+  /* Texto sobre los colores del cliente (sin «color relativo»: claro sobre primario, tinta sobre acento) */
+  --sobre-primario: color-mix(in oklab, var(--c-fondo) 70%, #fff);
+  --sobre-acento: var(--c-texto);
+  --margen-lado: max(1rem, calc((100% - var(--ancho)) / 2 + 1rem));
+  /* Luz de las teclas moldeadas y máscaras del plano (solo aquí hay literales) */
+  --luz: #fff;
+  --luz-34: color-mix(in oklab, #fff 34%, transparent);
+  --luz-18: color-mix(in oklab, #fff 18%, transparent);
+  --mascara: #000;
+  --mascara-tenue: rgb(0 0 0 / .35);
+}
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --papel-3: oklch(from var(--c-fondo) calc(l - 0.04) min(calc(c * 1.45), 0.05) h);
+    --foco: oklch(from var(--c-acento) min(l, 0.6) max(c, 0.12) h);
+    --verde: oklch(from var(--c-primario) min(l, 0.42) c h);
+    --agua: oklch(from var(--c-fondo) 0.6 0.05 232);
+    /* Claro u oscuro según la luminosidad del color del cliente */
+    --sobre-primario: oklch(from var(--c-primario) clamp(0.2, calc((0.63 - l) * 1000), 0.97) min(c, 0.02) h);
+    --sobre-acento: oklch(from var(--c-acento) clamp(0.18, calc((0.62 - l) * 1000), 0.985) min(c, 0.02) h);
+  }
+}
+@media (min-width: 40rem) { :root { --margen-lado: max(1.5rem, calc((100% - var(--ancho)) / 2 + 1.5rem)); } }
+@media (min-width: 60rem) { :root { --alto-cabecera: 4.5rem; --margen-lado: max(4rem, calc((100% - var(--ancho)) / 2 + 4rem)); } }
+
+@layer base {
+  html { overflow-x: clip; scroll-padding-top: calc(var(--alto-cabecera) + 1rem); }
+  body { font-family: var(--fuente-texto); font-size: 1.0625rem; line-height: 1.55; color: var(--tinta-2); background: var(--papel); font-synthesis: none; }
+  h1, h2, h3 {
+    font-family: var(--fuente-titulos); font-weight: 600; line-height: 1.02; letter-spacing: -0.03em; color: var(--tinta);
+    overflow-wrap: normal; word-break: normal; hyphens: manual; min-width: 0; text-wrap: balance;
+  }
+  a { text-decoration-color: currentColor; text-underline-offset: .2em; text-decoration-thickness: 1px; }
+  ::selection { background: var(--acento-suave); color: var(--tinta); }
+  :focus-visible { outline: 2px solid var(--foco); outline-offset: 3px; }
+  .banda--primaria :focus-visible, .banda--acento :focus-visible, .pie :focus-visible { outline-color: currentColor; }
+  main { padding-top: var(--alto-cabecera); }
+  img { display: block; }
+}
+
+@layer components {
+  .contenedor { max-width: var(--ancho); padding-inline: 1rem; }
+  @media (min-width: 40rem) { .contenedor { padding-inline: 1.5rem; } }
+  @media (min-width: 60rem) { .contenedor { padding-inline: 4rem; } }
+
+  /* ------------------------------------------------------------------ Bandas a todo el ancho */
+  .banda { position: relative; padding-block: var(--ritmo); background: var(--banda, var(--papel)); color: var(--tinta-2); }
+  @media (min-width: 40rem) { .banda { padding-block: var(--ritmo-md); } }
+  @media (min-width: 60rem) { .banda { padding-block: var(--ritmo-lg); } }
+  .banda--sin-relleno { padding-block: 0; }
+  .banda--papel { --banda: var(--papel); }
+  .banda--hoja { --banda: var(--papel-3); }
+  .banda--primaria { --banda: var(--c-primario); color: var(--sobre-primario); }
+  .banda--primaria h2, .banda--primaria h3 { color: var(--sobre-primario); }
+  .banda--acento { --banda: var(--c-acento); color: var(--sobre-acento); }
+  .banda--acento h2, .banda--acento h3 { color: var(--sobre-acento); }
+
+  /* Letra menuda: etiquetas, pies, celdas (Red Hat Text 500, un paso más pequeña, caja normal) */
+  .menuda { font-size: .875rem; font-weight: 500; line-height: 1.35; color: var(--apagado); }
+  .cifra { font-family: var(--fuente-cifras); font-weight: 400; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .antetitulo { font-size: .95rem; font-weight: 500; line-height: 1.3; color: var(--apagado); }
+  .banda--primaria .antetitulo, .banda--primaria .menuda { color: color-mix(in oklab, var(--sobre-primario) 76%, var(--c-primario)); }
+  .banda--acento .antetitulo, .banda--acento .menuda { color: color-mix(in oklab, var(--sobre-acento) 80%, var(--c-acento)); }
+
+  /* ------------------------------------------------------------------ Titulares */
+  .titular, .cabeza { container-type: inline-size; }
+  /* La palabra más larga que puede poner un cliente («Impermeabilizaciones», 9,3 em) cabe siempre en su columna */
+  .titulo-seccion { font-size: min(clamp(1.75rem, 1rem + 3vw, 3.25rem), 10.5cqi); max-width: 20ch; }
+  .entrada { font-size: clamp(1.08rem, 1rem + .35vw, 1.3rem); line-height: 1.5; color: var(--apagado); max-width: 44ch; }
+  .banda--primaria .entrada { color: color-mix(in oklab, var(--sobre-primario) 86%, var(--c-primario)); }
+  .banda--acento .entrada { color: color-mix(in oklab, var(--sobre-acento) 90%, var(--c-acento)); }
+  .titular .antetitulo + .titulo-seccion { margin-top: .85rem; }
+  .titular .titulo-seccion + .entrada, .titular .antetitulo + .entrada { margin-top: 1rem; }
+  /* Cabeza de sección: filete de tinta de 1 px a todo el ancho, título a la izquierda y entrada a la derecha */
+  .cabeza { display: grid; gap: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--tinta); margin-bottom: 2.5rem; }
+  .banda--primaria .cabeza { border-top-color: var(--sobre-primario); }
+  .banda--acento .cabeza { border-top-color: var(--sobre-acento); }
+  @media (min-width: 60rem) {
+    .cabeza { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; column-gap: 2rem; margin-bottom: 3.5rem; padding-top: 1.5rem; }
+    .cabeza > .antetitulo { grid-column: 1 / -1; }
+    .cabeza > .entrada { margin-top: 0; justify-self: end; }
+  }
+
+  /* ------------------------------------------------------------------ Teclas moldeadas de 6 px */
+  .btn, .btn-sec {
+    min-height: 3rem; padding: 0 1.4rem; border-radius: var(--radio-tecla); max-width: 100%;
+    font-family: var(--fuente-texto); font-weight: 500; font-size: 1rem; white-space: nowrap;
+    transition: transform var(--dur-micro) var(--salida), background-color var(--dur-corta) var(--salida), border-color var(--dur-corta) var(--salida);
+  }
+  .btn {
+    background: var(--c-acento); color: var(--sobre-acento); border: 1px solid var(--acento-borde);
+    box-shadow: inset 0 1px 0 var(--luz-34), inset 0 -1px 0 color-mix(in oklab, var(--c-texto) 12%, transparent);
+  }
+  .btn:hover { background: var(--acento-hover); }
+  .btn-sec {
+    background: var(--papel-2); color: var(--tinta); border: 1px solid var(--filete);
+    box-shadow: inset 0 1px 0 var(--luz), 0 1px 1px var(--filete);
+  }
+  .btn-sec:hover { border-color: var(--apagado); }
+  .btn:active, .btn-sec:active { transform: translateY(1px); }
+  .btn:disabled, .btn-sec:disabled, .campo input:disabled, .campo textarea:disabled, .campo select:disabled { opacity: .55; cursor: not-allowed; }
+  /* Sobre el campo mandarina, la tecla principal pasa a tinta */
+  .banda--acento .btn { background: var(--tinta); color: var(--papel); border-color: var(--tinta); box-shadow: inset 0 1px 0 var(--luz-18); }
+  .banda--acento .btn:hover { background: var(--tinta-2); }
+  .botones { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 2rem; }
+  .btn svg, .btn-sec svg { flex: none; }
+
+  /* Chips: verde = disponible / oficial; mandarina suave = reservada; neutro = el resto */
+  .chip { display: inline-flex; align-items: center; min-height: 1.75rem; padding: .15rem .6rem; border-radius: var(--radio-tecla); font-size: .85rem; font-weight: 500; line-height: 1.2; background: var(--papel-3); color: var(--tinta-2); white-space: nowrap; }
+  .chip--verde { background: var(--verde-suave); color: var(--verde); }
+  .chip--acento { background: var(--acento-suave); color: var(--tinta); }
+
+  /* Foto con el tratamiento del tema (natural, contraste +8, saturación -6), radio de 10 px y filete de tinta al 8 % */
+  .foto { position: relative; overflow: hidden; background: var(--papel-3); border-radius: var(--radio-tarjeta); }
+  .foto > img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.08) saturate(.94); }
+  .foto::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--tinta) 8%, transparent); }
+  .foto--sangre { border-radius: 0; }
+
+  /* ------------------------------------------------------------------ La libreta impermeable */
+  .libreta { position: relative; z-index: 2; overflow: hidden; border-radius: var(--radio-libreta); background: var(--papel-2); color: var(--tinta); box-shadow: 0 0 0 1px var(--tinta), var(--sombra-libreta); }
+  .libreta-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 1rem; background: var(--tinta); color: var(--papel); font-size: .92rem; font-weight: 500; }
+  .libreta-cabeza > span { display: inline-flex; align-items: center; gap: .5rem; min-width: 0; }
+  .libreta-cabeza .cifra { color: color-mix(in oklab, var(--papel) 78%, var(--tinta)); font-size: .85rem; }
+  .libreta-grande { display: block; padding: .6rem 1rem .8rem; font-family: var(--fuente-titulos); font-weight: 600; font-size: clamp(2rem, 1.4rem + 1.8vw, 2.75rem); line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--tinta); text-decoration: none; white-space: nowrap; }
+  a.libreta-grande:hover { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--c-acento); }
+  .cuadricula { background: linear-gradient(var(--rejilla) 1px, transparent 1px) 0 0 / 8px 8px, linear-gradient(90deg, var(--rejilla) 1px, transparent 1px) 0 0 / 8px 8px, var(--papel-2); }
+  .celdas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--tinta); }
+  .celdas > div { min-width: 0; padding: .55rem 1rem .7rem; border-bottom: 1px solid var(--tinta); }
+  .celdas > div:nth-child(odd) { border-right: 1px solid var(--tinta); }
+  .celdas > div:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; }
+  .celdas dt { font-size: .78rem; font-weight: 500; line-height: 1.3; color: var(--apagado); }
+  .celdas dd { margin-top: .15rem; font-weight: 500; font-size: 1rem; line-height: 1.3; color: var(--tinta); overflow-wrap: anywhere; }
+  .teclas-pie { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .teclas-pie > a { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 3.5rem; padding: 0 .75rem; font-weight: 500; font-size: .98rem; text-decoration: none; color: var(--tinta); background: var(--papel-2); white-space: nowrap; transition: background-color var(--dur-corta) var(--salida); }
+  .teclas-pie > a + a { border-left: 1px solid var(--tinta); }
+  .teclas-pie > a:hover { background: var(--acento-suave); }
+  .teclas-pie > a:focus-visible { outline-offset: -3px; }
+
+  /* La hoja blanca: índice con filetes */
+  .hoja { background: var(--papel-2); border-radius: var(--radio-hoja); box-shadow: var(--sombra-hoja); padding: 1.25rem 1rem; }
+  @media (min-width: 40rem) { .hoja { padding: 2rem 2.25rem; } }
+
+  /* ------------------------------------------------------------------ Cabecera fija (siempre sólida, por encima de todo) */
+  .cabecera--surco { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: var(--papel); color: var(--tinta); border-bottom: 1px solid var(--tinta); }
+  .cabecera--surco .cabecera-fila { min-height: var(--alto-cabecera); gap: 1rem; }
+  .cabecera--surco .marca-nombre { font-family: var(--fuente-titulos); font-weight: 600; font-size: 1.3rem; line-height: 1.1; letter-spacing: -0.025em; }
+  @media (min-width: 60rem) { .cabecera--surco .marca-nombre { font-size: 1.45rem; } }
+  .cabecera--surco .cabecera-nav { gap: .1rem; }
+  .cabecera--surco .cabecera-nav a { font-size: .95rem; font-weight: 500; padding: .55rem .7rem; white-space: nowrap; border-radius: var(--radio-tecla); transition: background-color var(--dur-corta) var(--salida); }
+  .cabecera--surco .cabecera-nav a:hover { background: var(--papel-3); }
+  .cabecera-telefono { display: none; align-items: center; gap: .45rem; min-height: 2.75rem; padding-inline: .4rem; font-size: .95rem; text-decoration: none; white-space: nowrap; color: var(--tinta); }
+  .cabecera-telefono:hover { text-decoration: underline; }
+  @media (min-width: 75rem) { .cabecera-telefono { display: inline-flex; } }
+  .cabecera--surco .cabecera-cta { min-height: 2.75rem; padding-inline: 1.1rem; font-size: .95rem; }
+  .cabecera--surco .menu-movil summary { min-height: 2.75rem; padding: .45rem .9rem; border: 1px solid var(--filete); border-radius: var(--radio-tecla); background: var(--papel-2); font-weight: 500; font-size: .98rem; box-shadow: inset 0 1px 0 var(--luz); }
+  .cabecera--surco .menu-movil-panel { padding: .5rem 1rem 1.5rem; background: var(--papel); color: var(--tinta); border-top: 1px solid var(--tinta); border-bottom: 1px solid var(--tinta); box-shadow: none; }
+  .cabecera--surco .menu-movil-panel a { font-family: var(--fuente-titulos); font-weight: 600; font-size: 1.45rem; letter-spacing: -0.02em; min-height: 3rem; display: flex; align-items: center; border-bottom-color: var(--filete); }
+  .cabecera--surco .menu-movil-panel .btn { font-family: var(--fuente-texto); font-weight: 500; font-size: 1rem; letter-spacing: 0; margin-top: 1rem; justify-content: center; }
+  @media (min-width: 60rem) and (max-width: 74.99rem) { .cabecera--surco .cabecera-nav a { padding-inline: .45rem; font-size: .9rem; } }
+
+  /* ------------------------------------------------------------------ El plano (curvas de nivel generadas en un canvas) */
+  .plano { position: relative; overflow: hidden; background: var(--papel); }
+  .plano > canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+  /* ------------------------------------------------------------------ Portada «Stage»: texto sobre el plano, foto a sangre a la derecha */
+  .portada { position: relative; display: grid; background: var(--papel); border-bottom: 1px solid var(--tinta); }
+  .portada-lado { position: relative; z-index: 1; container-type: inline-size; display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 2rem 1rem 3rem; }
+  .portada-lado > .plano { position: absolute; inset: 0; z-index: -1; background: transparent; }
+  .portada-lado > .plano > canvas { opacity: .55; }
+  .portada-lado > .plano { -webkit-mask-image: linear-gradient(100deg, var(--mascara-tenue) 15%, var(--mascara) 85%); mask-image: linear-gradient(100deg, var(--mascara-tenue) 15%, var(--mascara) 85%); }
+  @media (min-width: 40rem) { .portada-lado { padding: 3rem 1.5rem 4rem; } }
+  .portada-foto { position: relative; min-width: 0; }
+  .portada-foto .foto { aspect-ratio: 4 / 3; }
+  .portada-foto .foto > img { object-position: 72% 55%; }
+  .portada-foto .libreta { margin: -3.5rem 1rem 0; }
+  @media (min-width: 40rem) { .portada-foto .libreta { margin-inline: 1.5rem; max-width: 24rem; } }
+  @media (min-width: 60rem) {
+    .portada--con-foto { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); min-height: min(calc(100svh - var(--alto-cabecera)), 58rem); }
+    .portada-lado { padding: 4rem clamp(2.5rem, 4.5vw, 5rem) 4rem var(--margen-lado); }
+    .portada:not(.portada--con-foto) .portada-lado { min-height: calc(76svh - var(--alto-cabecera)); padding-inline: var(--margen-lado); }
+    .portada-foto .foto { position: absolute; inset: 0; aspect-ratio: auto; }
+    .portada-foto .libreta { position: absolute; left: -3rem; bottom: 3rem; margin: 0; width: min(24rem, 80%); }
+  }
+  .portada-titulo { font-size: clamp(2.05rem, .9rem + 5.2vw, 5.25rem); line-height: .98; letter-spacing: -0.035em; max-width: 10em; }
+  @media (min-width: 60rem) { .portada-titulo { font-size: min(5.25rem, 10.4cqi); } }
+  .portada .antetitulo + .portada-titulo { margin-top: 1rem; }
+  .portada-parrafo { margin-top: 1.4rem; max-width: 30rem; font-size: clamp(1.1rem, 1rem + .4vw, 1.3rem); line-height: 1.5; color: var(--apagado); }
+  .portada-lado .botones { margin-top: 2.25rem; }
+
+  /* ------------------------------------------------------------------ Marcas: índice con filetes en la hoja blanca */
+  .indice { width: 100%; border-collapse: collapse; }
+  .indice thead th { padding: 0 1rem .75rem 0; text-align: left; font-size: .85rem; font-weight: 500; color: var(--apagado); border-bottom: 1px solid var(--tinta); white-space: nowrap; }
+  .indice tbody tr { border-bottom: 1px solid var(--filete); }
+  .indice tbody tr:last-child { border-bottom: 0; }
+  .indice td { padding: 1.1rem 1rem 1.1rem 0; vertical-align: baseline; }
+  .indice-nombre { font-family: var(--fuente-titulos); font-weight: 600; font-size: clamp(1.35rem, 1.1rem + .8vw, 1.85rem); line-height: 1.05; letter-spacing: -0.025em; color: var(--tinta); }
+  .indice-gama { font-weight: 500; color: var(--tinta); }
+  .indice-texto { color: var(--apagado); font-size: .98rem; }
+  @media (max-width: 47.99rem) {
+    .indice thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .indice tbody tr { display: grid; gap: .35rem; padding-block: 1.1rem; }
+    .indice td { display: block; padding: 0; }
+  }
+
+  /* ------------------------------------------------------------------ Maquinaria nueva: mosaico de fotos */
+  .flota { display: grid; gap: 2rem 1.25rem; grid-template-columns: minmax(0, 1fr); }
+  .flota-pieza { display: flex; flex-direction: column; min-width: 0; }
+  .flota-pieza .foto { aspect-ratio: 4 / 3; }
+  .flota-pieza h3 { margin-top: 1rem; font-size: clamp(1.3rem, 1.1rem + .6vw, 1.6rem); letter-spacing: -0.025em; }
+  .flota-pieza p { margin-top: .35rem; color: var(--apagado); font-size: .98rem; max-width: 38ch; }
+  @media (min-width: 40rem) {
+    .flota { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .flota > .flota-pieza:first-child { grid-column: 1 / -1; }
+    .flota--2 > .flota-pieza:first-child, .flota--4 > .flota-pieza:first-child { grid-column: auto; }
+  }
+  @media (min-width: 60rem) {
+    .flota { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2.5rem 2rem; }
+    .flota > .flota-pieza { grid-column: span 4; }
+    .flota > .flota-pieza:first-child { grid-column: span 4; }
+    .flota--1 > .flota-pieza:first-child { grid-column: 1 / -1; }
+    .flota--1 > .flota-pieza:first-child .foto { aspect-ratio: 21 / 9; }
+    .flota--2 > .flota-pieza, .flota--2 > .flota-pieza:first-child { grid-column: span 6; }
+    .flota--3 > .flota-pieza:first-child, .flota--4 > .flota-pieza:first-child, .flota--5 > .flota-pieza:first-child { grid-column: span 6; grid-row: span 2; }
+    .flota--3 > .flota-pieza:first-child .foto, .flota--4 > .flota-pieza:first-child .foto, .flota--5 > .flota-pieza:first-child .foto { aspect-ratio: auto; flex: 1; min-height: 22rem; }
+    .flota--3 > .flota-pieza:not(:first-child) { grid-column: span 6; }
+    .flota--3 > .flota-pieza:not(:first-child) .foto { aspect-ratio: 16 / 9; }
+    .flota--4 > .flota-pieza:nth-child(2), .flota--4 > .flota-pieza:nth-child(3), .flota--5 > .flota-pieza:not(:first-child) { grid-column: span 3; }
+    .flota--4 > .flota-pieza:nth-child(4) { grid-column: 1 / -1; }
+    .flota--4 > .flota-pieza:nth-child(4) .foto { aspect-ratio: 21 / 9; }
+  }
+  .pie-seccion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--filete); }
+  .pie-seccion .botones { margin-top: 0; }
+
+  /* ------------------------------------------------------------------ Recambios: filas con filetes sobre el campo mandarina */
+  .campo-banda { display: grid; gap: 2.5rem; position: relative; z-index: 1; }
+  @media (min-width: 60rem) { .campo-banda { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4rem; align-items: start; } }
+  .campo-banda > div:first-child > .titular { padding-top: 1.25rem; border-top: 1px solid var(--sobre-acento); }
+  .banda--acento > .plano { position: absolute; inset: 0; background: transparent; }
+  .banda--acento > .plano > canvas { opacity: .5; }
+  .filas { border-top: 2px solid currentColor; }
+  .filas li { display: grid; gap: .25rem 2rem; padding-block: 1.15rem; border-bottom: 1px solid color-mix(in oklab, currentColor 28%, transparent); }
+  @media (min-width: 40rem) { .filas li { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: baseline; } }
+  .filas-titulo { font-family: var(--fuente-titulos); font-weight: 600; font-size: clamp(1.2rem, 1.05rem + .5vw, 1.45rem); line-height: 1.12; letter-spacing: -0.02em; }
+  .filas-texto { font-size: 1rem; }
+  .nota { margin-top: 1.25rem; max-width: 40ch; }
+
+  /* ------------------------------------------------------------------ Ocasión: libretas sobre la cuadrícula */
+  .tablero { padding: 1rem; border-radius: var(--radio-tarjeta); box-shadow: inset 0 0 0 1px var(--filete); }
+  @media (min-width: 40rem) { .tablero { padding: 2rem; } }
+  @media (min-width: 60rem) { .tablero { padding: 2.5rem; } }
+  .ocasiones { display: grid; gap: 2rem 1.75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+  .ocasion { display: flex; flex-direction: column; }
+  .ocasion .foto { border-radius: 0; aspect-ratio: 4 / 3; }
+  .ocasion .foto::after { box-shadow: none; }
+  .ocasion-cuerpo { padding: 1rem 1rem 1.1rem; background: var(--papel-2); }
+  .ocasion h3 { font-size: clamp(1.25rem, 1.1rem + .4vw, 1.45rem); letter-spacing: -0.02em; }
+  .ocasion h3 a { text-decoration: none; }
+  .ocasion h3 a:hover { text-decoration: underline; text-decoration-color: var(--c-acento); text-decoration-thickness: 2px; }
+  .ocasion-texto { margin-top: .4rem; font-size: .96rem; color: var(--apagado); }
+  .ocasion .celdas { margin-top: auto; }
+  .ocasion-total { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .7rem 1rem .8rem; border-top: 2px solid var(--tinta); border-bottom: 1px solid var(--tinta); background: var(--papel-2); }
+  .ocasion-precio { font-family: var(--fuente-titulos); font-weight: 600; font-size: 1.6rem; line-height: 1; letter-spacing: -0.02em; color: var(--tinta); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* ------------------------------------------------------------------ Mitad texto + mitad foto a sangre (taller) */
+  .mitades { display: grid; }
+  @media (min-width: 60rem) { .mitades { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+  .mitad-texto { min-width: 0; padding: var(--ritmo) 1rem; }
+  @media (min-width: 40rem) { .mitad-texto { padding: var(--ritmo-md) 1.5rem; } }
+  @media (min-width: 60rem) { .mitad-texto { padding: var(--ritmo-lg) var(--margen-lado) var(--ritmo-lg) clamp(2.5rem, 5vw, 6rem); } }
+  .mitad-foto { min-height: 22rem; aspect-ratio: 4 / 3; }
+  @media (min-width: 60rem) { .mitades--foto-izq > .mitad-foto { order: -1; aspect-ratio: auto; min-height: 100%; } }
+  .mitad-foto > img { position: absolute; inset: 0; }
+  .banda--primaria .filas { border-top-color: var(--sobre-primario); }
+
+  /* ------------------------------------------------------------------ Zonas: la comarca en el plano */
+  .comarca { display: grid; gap: 1.5rem; }
+  .comarca-plano { min-height: 22rem; aspect-ratio: 4 / 3; border-radius: var(--radio-tarjeta); box-shadow: inset 0 0 0 1px var(--filete); }
+  @media (min-width: 40rem) { .comarca-plano { aspect-ratio: 16 / 10; } }
+  @media (min-width: 60rem) {
+    .comarca { position: relative; display: block; }
+    .comarca-plano { aspect-ratio: auto; height: 38rem; }
+    .comarca > .libreta { position: absolute; right: 2.5rem; bottom: 2.5rem; width: 23rem; }
+  }
+  .chincheta { position: absolute; z-index: 1; display: flex; align-items: center; gap: .45rem; transform: translate(-.6rem, -50%); }
+  .chincheta-marca { flex: none; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: var(--tinta); box-shadow: 0 0 0 3px var(--papel-2), 0 0 0 4px var(--tinta); }
+  .chincheta--base .chincheta-marca { border-radius: 2px; transform: rotate(45deg); background: var(--c-acento); }
+  .chincheta-nombre { padding: .3rem .55rem; border-radius: 5px; background: var(--tinta); color: var(--papel); font-size: .85rem; font-weight: 500; line-height: 1.2; white-space: nowrap; text-decoration: none; }
+  a.chincheta-nombre:hover { background: var(--tinta-2); text-decoration: underline; }
+  .chincheta--base .chincheta-nombre { background: var(--papel-2); color: var(--tinta); box-shadow: 0 0 0 1px var(--tinta); }
+  .chincheta--izq { flex-direction: row-reverse; transform: translate(calc(-100% + .6rem), -50%); }
+  @media (max-width: 39.99rem) { .chincheta-nombre { font-size: .78rem; padding: .25rem .45rem; } .chincheta-marca { width: .9rem; height: .9rem; } }
+  .zonas-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); column-gap: 2rem; margin-top: 2rem; border-top: 1px solid var(--tinta); }
+  .zonas-lista li { border-bottom: 1px solid var(--filete); }
+  .zonas-lista a, .zonas-lista span { display: flex; align-items: center; min-height: 3rem; padding-block: .7rem; font-weight: 500; color: var(--tinta); }
+  .zonas-lista a { text-decoration: underline; text-decoration-color: var(--filete); text-underline-offset: .25em; }
+  .zonas-lista a:hover { text-decoration-color: var(--c-acento); text-decoration-thickness: 2px; }
+
+  /* ------------------------------------------------------------------ Preguntas: filas con filetes */
+  .preguntas-rejilla { display: grid; gap: 2.5rem; }
+  @media (min-width: 60rem) { .preguntas-rejilla { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 4rem; } .preguntas-rejilla > .titular { position: sticky; top: calc(var(--alto-cabecera) + 2rem); align-self: start; } }
+  .preguntas-rejilla > .titular { padding-top: 1.25rem; border-top: 1px solid var(--tinta); }
+  .faq { border-bottom: 1px solid var(--filete); }
+  .faq:first-child { border-top: 1px solid var(--tinta); }
+  .faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; min-height: 3rem; padding-block: 1.2rem; font-family: var(--fuente-titulos); font-weight: 600; font-size: clamp(1.12rem, 1rem + .45vw, 1.35rem); line-height: 1.25; letter-spacing: -0.015em; color: var(--tinta); }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary:hover .faq-signo { background: var(--acento-suave); }
+  .faq-signo { position: relative; flex: none; width: 2rem; height: 2rem; border-radius: var(--radio-tecla); border: 1px solid var(--filete); background: var(--papel-2); transition: background-color var(--dur-corta) var(--salida); }
+  .faq-signo::before, .faq-signo::after { content: ""; position: absolute; left: 50%; top: 50%; width: .75rem; height: 2px; background: var(--tinta); transform: translate(-50%, -50%); transition: transform var(--dur-corta) var(--salida); }
+  .faq-signo::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .faq[open] .faq-signo::after { transform: translate(-50%, -50%) rotate(0deg); }
+  .faq-respuesta { padding: 0 3.25rem 1.4rem 0; color: var(--tinta-2); max-width: 46rem; }
+
+  /* ------------------------------------------------------------------ Contacto: vías, horario y el formulario en una libreta */
+  .contacto-rejilla { display: grid; gap: 3rem; }
+  @media (min-width: 60rem) { .contacto-rejilla { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 5rem; align-items: start; } }
+  .contacto-rejilla > div:first-child > .titular { padding-top: 1.25rem; border-top: 1px solid var(--tinta); }
+  .vias { margin-top: 2rem; border-top: 1px solid var(--tinta); }
+  .vias li { border-bottom: 1px solid var(--filete); }
+  .vias a { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 1rem; min-height: 3rem; padding-block: .9rem; text-decoration: none; }
+  .vias-icono { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--filete); border-radius: var(--radio-tecla); background: var(--papel-2); color: var(--tinta); box-shadow: inset 0 1px 0 var(--luz); }
+  .vias-dato { display: block; font-weight: 500; font-size: clamp(1.05rem, 1rem + .3vw, 1.2rem); line-height: 1.3; color: var(--tinta); overflow-wrap: anywhere; }
+  .vias a:hover .vias-dato { text-decoration: underline; text-decoration-color: var(--c-acento); text-decoration-thickness: 2px; text-underline-offset: .2em; }
+  .horario { width: 100%; margin-top: 2rem; border-collapse: collapse; border-top: 1px solid var(--tinta); }
+  .horario caption { text-align: left; padding-bottom: .6rem; }
+  .horario tr { border-bottom: 1px solid var(--filete); }
+  .horario th { padding: .85rem 1rem .85rem 0; text-align: left; vertical-align: baseline; font-weight: 500; color: var(--tinta); }
+  .horario td { padding-block: .85rem; text-align: right; vertical-align: baseline; font-size: .95rem; color: var(--tinta-2); }
+  .formulario-libreta .formulario { padding: 1.25rem 1rem 1.5rem; }
+  @media (min-width: 40rem) { .formulario-libreta .formulario { padding: 1.75rem 1.75rem 2rem; } }
+
+  /* Formulario: la etiqueta va dentro de la caja, pequeña y apagada arriba a la izquierda */
+  .formulario-doble { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); }
+  .campo { position: relative; min-width: 0; gap: 0; }
+  .campo label { position: absolute; left: .85rem; top: .45rem; z-index: 1; font-size: .78rem; font-weight: 500; color: var(--apagado); pointer-events: none; }
+  .campo input, .campo textarea, .campo select { min-width: 0; max-width: 100%; width: 100%; min-height: 3.25rem; padding: 1.45rem .85rem .45rem; border-radius: var(--radio-tecla); border: 1px solid var(--apagado); background: var(--papel-2); font: inherit; font-size: 1rem; color: var(--tinta); }
+  .campo textarea { padding-top: 1.6rem; resize: vertical; }
+  .campo select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--tinta) 50%), linear-gradient(135deg, var(--tinta) 50%, transparent 50%); background-position: calc(100% - 1.15rem) 1.55rem, calc(100% - .8rem) 1.55rem; background-size: .35rem .35rem; background-repeat: no-repeat; padding-right: 2.25rem; }
+  .campo input:focus-visible, .campo textarea:focus-visible, .campo select:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
+  .campo-check { min-height: 2.75rem; color: var(--tinta-2); }
+  .campo-check input { accent-color: var(--tinta); }
+  .campo-check a { text-decoration: underline; }
+  .formulario-aviso { font-size: .85rem; font-weight: 500; color: var(--apagado); opacity: 1; }
+
+  /* Apartado de texto: lista */
+  .partido { display: grid; gap: 2.5rem; }
+  @media (min-width: 60rem) { .partido { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 4rem; align-items: start; } }
+  .partido > .titular { padding-top: 1.25rem; border-top: 1px solid var(--tinta); }
+  .parrafos { display: grid; gap: 1rem; max-width: 40rem; }
+  .lista-marcas { display: grid; gap: 0 2rem; margin-top: 2rem; border-top: 1px solid var(--tinta); }
+  @media (min-width: 40rem) { .lista-marcas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lista-marcas li { padding-block: 1rem; border-bottom: 1px solid var(--filete); }
+  .lista-titulo { font-weight: 500; color: var(--tinta); }
+  .lista-texto { color: var(--apagado); font-size: .98rem; }
+
+  /* ------------------------------------------------------------------ Pie: mástil en la banda de tinta */
+  .pie--surco { padding-top: var(--ritmo-md); background: var(--tinta); color: var(--papel); }
+  .pie-gigante { font-family: var(--fuente-titulos); font-weight: 600; font-size: clamp(2.2rem, 1rem + 6vw, 6.5rem); line-height: .95; letter-spacing: -0.04em; color: var(--papel); overflow-wrap: normal; hyphens: manual; max-width: 15ch; text-wrap: balance; }
+  .pie--surco .pie-eslogan { margin-top: 1rem; max-width: 46ch; font-size: 1.1rem; opacity: 1; color: color-mix(in oklab, var(--papel) 78%, var(--tinta)); }
+  .pie-columnas { display: grid; gap: 2.25rem; margin-top: 3rem; padding-block: 2.5rem; border-top: 1px solid color-mix(in oklab, var(--papel) 30%, var(--tinta)); }
+  @media (min-width: 40rem) { .pie-columnas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 60rem) { .pie-columnas { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .pie--surco .pie-titulo { font-size: .88rem; font-weight: 500; text-transform: none; letter-spacing: 0; opacity: 1; color: color-mix(in oklab, var(--papel) 66%, var(--tinta)); margin-bottom: .6rem; }
+  .pie-dato { font-size: 1.02rem; line-height: 1.5; }
+  .pie-dato a, .pie--surco .pie-lista a { text-decoration: none; }
+  .pie-dato a:hover, .pie--surco .pie-lista a:hover { text-decoration: underline; }
+  .pie--surco .pie-lista a { display: inline-block; padding-block: .3rem; }
+  .pie-redes { display: flex; gap: .6rem; margin-top: 1rem; }
+  .pie--surco .pie-redes a { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 1px solid color-mix(in oklab, var(--papel) 40%, var(--tinta)); border-radius: var(--radio-tecla); }
+  .pie--surco .pie-redes a:hover { border-color: var(--papel); }
+  .pie-legal { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-block: 1.5rem; border-top: 1px solid color-mix(in oklab, var(--papel) 18%, var(--tinta)); }
+  .pie--surco .pie-legal { margin-top: 0; opacity: 1; font-size: .9rem; color: color-mix(in oklab, var(--papel) 76%, var(--tinta)); }
+  .pie-noexpertise a { text-decoration: underline; }
+
+  /* Barra fija del móvil: llamar y pedir precio siempre a mano */
+  .barra-movil { position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: .6rem; padding: .6rem .75rem calc(.6rem + env(safe-area-inset-bottom)); background: var(--papel); border-top: 1px solid var(--tinta); }
+  .barra-movil a { min-height: 3rem; padding-inline: .75rem; gap: .5rem; }
+  @media (min-width: 60rem) { .barra-movil { display: none; } }
+  @media (max-width: 59.99rem) { body:has(.barra-movil) .pie--surco { padding-bottom: 4.75rem; } }
+
+  /* ------------------------------------------------------------------ Páginas sueltas */
+  .migas { margin-bottom: 1.5rem; }
+  .migas ol { display: flex; flex-wrap: wrap; gap: .25rem .6rem; }
+  .migas li { display: inline-flex; align-items: center; gap: .6rem; min-width: 0; }
+  .migas li + li::before { content: "/"; color: var(--apagado); }
+  .migas a { min-height: 2.75rem; display: inline-flex; align-items: center; color: var(--tinta-2); }
+  .migas [aria-current] { color: var(--apagado); }
+  .texto-largo h2 { font-family: var(--fuente-titulos); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--tinta); margin-top: 2rem; }
+  .texto-largo p { margin-top: .85rem; }
+  .error-cifra { font-family: var(--fuente-cifras); font-size: clamp(6rem, 25vw, 13rem); line-height: .85; color: var(--tinta); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-signo::before, .faq-signo::after, .btn, .btn-sec, .teclas-pie > a, .cabecera--surco .cabecera-nav a { transition: none; }
+}

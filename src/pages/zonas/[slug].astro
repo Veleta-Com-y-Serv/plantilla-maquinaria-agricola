@@ -1,0 +1,127 @@
+---
+// Página de una zona con `texto` (src/lib/paginas.ts, sección `zonas`): /zonas/<slug>/.
+// Diseño Furrow: cabecera sobre el plano de curvas de nivel con migas, «Taller de maquinaria agrícola en <zona>»
+// (`titulo_pagina` de la sección, con {zona}), la entrada (`texto_pagina`) y las teclas; el texto propio de la zona junto a
+// la foto (la de la zona o la de la sección) y la libreta de avería; lo que hace el taller (`taller.items`) en filas con
+// filetes; y las otras zonas con página.
+import Base from '../../layouts/Base.astro';
+import Imagen from '../../components/ui/Imagen.astro';
+import Icono from '../../components/ui/Icono.astro';
+import { seccion, site, tel, whatsapp, semilla } from '../../data/site';
+import { introZona, resumen, tituloZona, zonasConPagina } from '../../lib/paginas';
+import type { Zona } from '../../lib/paginas';
+import { jsonLdMigas, jsonLdZona, urlBase } from '../../lib/seo';
+import { enlace, rutaDeSeccion } from '../../lib/multipagina';
+
+export function getStaticPaths() {
+  return zonasConPagina().map((z) => ({ params: { slug: z.slug }, props: { z } }));
+}
+
+interface Props { z: Zona }
+const { z } = Astro.props;
+const base = urlBase(Astro.site);
+const titulo = tituloZona(z);
+const intro = introZona(z);
+const nombreSeccion = String(z.seccion.antetitulo || z.seccion.titulo || 'Zonas').trim();
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: nombreSeccion, ruta: rutaDeSeccion(z.idSeccion) },
+  { nombre: z.nombre, ruta: z.url },
+];
+const c = site.contacto;
+const foto = z.imagen || String(z.seccion.imagen || '');
+const taller = seccion('taller');
+const trabajos = taller ? taller.items.filter((it) => it?.titulo) : [];
+const contacto = site.boton_cabecera?.url || enlace('/#contacto');
+const textoContacto = site.boton_cabecera?.texto || 'Pedir precio';
+const wa = whatsapp(c.whatsapp, `Hola, tengo una avería en ${z.nombre}. Os mando la ubicación: `);
+const aviso = (z.seccion.aviso ?? {}) as { titulo?: string; texto?: string };
+const otras = zonasConPagina().filter((x) => x !== z);
+---
+
+<Base titulo={titulo} descripcion={resumen(z.texto[0] ?? intro)} imagen={foto} ld={[jsonLdMigas(base, migas), jsonLdZona(base, z)]}>
+  <section class="portada zona-portada">
+    <div class="portada-lado">
+      <div class="plano" data-plano="curvas" data-semilla={semilla(site.nombre + z.nombre)} aria-hidden="true"><canvas /></div>
+      <nav aria-label="Migas de pan" class="migas menuda">
+        <ol>
+          {migas.map((m, i) => (
+            <li>{i < migas.length - 1 ? <a href={m.ruta}>{m.nombre}</a> : <span aria-current="page">{m.nombre}</span>}</li>
+          ))}
+        </ol>
+      </nav>
+      <h1 class="portada-titulo zona-titulo">{titulo}</h1>
+      {intro && <p class="portada-parrafo">{intro}</p>}
+      <div class="botones">
+        <a class="btn" href={contacto}>{textoContacto}</a>
+        {c.telefono && <a class="btn-sec" href={tel(c.telefono)}><Icono nombre="telefono" tam={18} /> {c.telefono}</a>}
+      </div>
+    </div>
+  </section>
+
+  <section class="banda banda--papel">
+    <div class:list={['contenedor zona-cuerpo', { 'zona-cuerpo--foto': foto }]}>
+      <div class="zona-texto">
+        {z.texto.map((p) => <p>{p}</p>)}
+      </div>
+      <div class="zona-lado">
+        {foto && <div class="foto zona-foto"><Imagen src={foto} alt={titulo} ancho={1400} alto={1050} /></div>}
+        {(c.telefono || wa) && (
+          <div class="libreta">
+            <p class="libreta-cabeza"><span><Icono nombre="herramienta" tam={16} /> {aviso.titulo || 'Avería en el campo'}</span><span>{z.nombre}</span></p>
+            {c.telefono && <a class="libreta-grande" href={tel(c.telefono)}>{c.telefono}</a>}
+            <div class="teclas-pie zona-teclas">
+              {c.telefono && <a href={tel(c.telefono)}><Icono nombre="telefono" tam={18} /> Llamar</a>}
+              {wa && <a href={wa} rel="noopener" target="_blank"><Icono nombre="whatsapp" tam={18} /> WhatsApp</a>}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  {trabajos.length > 0 && (
+    <section class="banda banda--primaria">
+      <div class="contenedor partido">
+        <div class="titular">
+          {taller?.antetitulo && <p class="antetitulo">{taller.antetitulo}</p>}
+          <h2 class="titulo-seccion">Qué hacemos en {z.nombre}</h2>
+        </div>
+        <ul class="filas">
+          {trabajos.map((it) => (
+            <li>
+              <p class="filas-titulo">{it.titulo}</p>
+              {it.texto && <p class="filas-texto">{it.texto}</p>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {otras.length > 0 && (
+    <section class="banda banda--hoja">
+      <div class="contenedor">
+        <h2 class="titulo-seccion zona-otras-titulo">También vamos a</h2>
+        <ul class="zonas-lista">
+          {otras.map((o) => <li><a href={o.url}>{o.nombre}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .zona-portada .portada-lado { min-height: 26rem; }
+  @media (min-width: 60rem) { .zona-portada .portada-lado { min-height: 30rem; padding-right: var(--margen-lado); } }
+  .zona-titulo { max-width: 16ch; font-size: clamp(1.85rem, .8rem + 4.4vw, 4.5rem); }
+  @media (min-width: 60rem) { .zona-titulo { font-size: min(4.5rem, 5.6cqi); } }
+  .zona-cuerpo { display: grid; gap: 3rem; }
+  .zona-texto { display: grid; gap: 1.1rem; max-width: 42rem; font-size: 1.12rem; line-height: 1.7; }
+  .zona-lado { display: grid; gap: 1.5rem; align-content: start; }
+  .zona-foto { aspect-ratio: 4 / 3; }
+  .zona-teclas { border-top: 1px solid var(--tinta); }
+  .zona-otras-titulo { font-size: clamp(1.5rem, 1rem + 2vw, 2.25rem); }
+  .partido > .titular { border-top-color: var(--sobre-primario); }
+  @media (min-width: 60rem) { .zona-cuerpo { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 5rem; align-items: start; } }
+</style>

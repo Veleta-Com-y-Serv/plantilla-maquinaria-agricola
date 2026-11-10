@@ -1,0 +1,59 @@
+---
+// Cabecera «surco»: fija arriba, a todo el ancho y siempre sólida (papel manila con un filete de tinta debajo). Nombre en
+// Red Hat Display, enlaces en Red Hat Text, el teléfono en cifras (en pantallas anchas) y `boton_cabecera` como tecla
+// blanca moldeada (la tecla mandarina es la de la portada). En móvil, menú plegable con <details>. Va por encima de todo
+// (z-index 50). Aspecto: .cabecera--surco en src/styles/global.css.
+import { site, tel, fuera } from '../data/site';
+import type { Enlace } from '../data/site';
+import Icono from './ui/Icono.astro';
+interface Props { variante?: string; cta?: Enlace | null }
+const { variante = 'surco', cta = null } = Astro.props;
+const telefono = site.contacto.telefono;
+---
+
+<header class={`cabecera cabecera--${variante}`}>
+  <div class="contenedor cabecera-fila">
+    <a href="/" class="marca" aria-label={`${site.nombre}, inicio`}>
+      {
+        site.logo ? (
+          <img src={site.logo} alt={site.nombre} class="marca-logo" width="160" height="40" />
+        ) : (
+          <span class="marca-nombre">{site.nombre}</span>
+        )
+      }
+    </a>
+    <nav class="cabecera-nav" aria-label="Menú principal">
+      {site.menu.map((e) => <a href={e.url} {...fuera(e.url)}>{e.texto}</a>)}
+    </nav>
+    {
+      telefono && (
+        <a class="cabecera-telefono" href={tel(telefono)} aria-label={`Llamar al ${telefono}`}>
+          <Icono nombre="telefono" tam={18} />
+          <span class="cifra">{telefono}</span>
+        </a>
+      )
+    }
+    {cta && cta.url && <a href={cta.url} class="btn-sec cabecera-cta" {...fuera(cta.url)}>{cta.texto}</a>}
+    {
+      (site.menu.length > 0 || (cta && cta.url)) && (
+        <details class="menu-movil">
+          <summary>
+            <span class="menu-movil-icono" aria-hidden="true" />
+            <span>Menú</span>
+          </summary>
+          <nav class="menu-movil-panel" aria-label="Menú">
+            {site.menu.map((e) => <a href={e.url} {...fuera(e.url)}>{e.texto}</a>)}
+            {cta && cta.url && <a href={cta.url} class="btn" {...fuera(cta.url)}>{cta.texto}</a>}
+          </nav>
+        </details>
+      )
+    }
+  </div>
+</header>
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.menu-movil a').forEach(function (a) {
+      a.addEventListener('click', function () { a.closest('details').open = false; });
+    });
+  });
+</script>

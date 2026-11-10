@@ -1,0 +1,45 @@
+---
+// «Maquinaria nueva»: cabeza con filete y las familias (`items` {titulo, texto, imagen, url?}) en un mosaico de fotos
+// grandes: la primera manda (media anchura y dos filas) y las demás alrededor; el reparto cambia según cuántas haya
+// (de 1 a 5; con más, tres por fila). Cada foto con su título y una línea debajo. Con `url`, el título enlaza.
+// Al pie, el `cta` (por defecto, al contacto).
+import { seccion, fuera } from '../../data/site';
+import { altFicha } from '../../lib/seo';
+import Banda from '../ui/Banda.astro';
+import Titular from '../ui/Titular.astro';
+import Imagen from '../ui/Imagen.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+const items = s?.items ?? [];
+const n = items.length;
+const t = (v: unknown) => (v == null ? '' : String(v).trim());
+---
+
+{
+  s && (s.titulo || n > 0) && (
+    <Banda id={Astro.props.id} color="papel">
+      <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} cabeza />
+      {n > 0 && (
+        <ul class:list={['flota', n <= 5 ? `flota--${n}` : 'flota--muchas']}>
+          {items.map((it) => (
+            <li class="flota-pieza">
+              {t(it.imagen) && (
+                <div class="foto">
+                  <Imagen src={t(it.imagen)} alt={altFicha(it)} ancho={1400} alto={1050} />
+                </div>
+              )}
+              <h3>{t(it.url) ? <a href={t(it.url)} {...fuera(t(it.url))}>{it.titulo}</a> : it.titulo}</h3>
+              {t(it.texto) && <p>{t(it.texto)}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {s.cta?.url && (
+        <div class="pie-seccion">
+          <p class="menuda">{s.nota}</p>
+          <div class="botones"><a class="btn-sec" href={s.cta.url} {...fuera(s.cta.url)}>{s.cta.texto}</a></div>
+        </div>
+      )}
+    </Banda>
+  )
+}

@@ -1,0 +1,79 @@
+---
+// Portada «Stage»: a la izquierda, sobre el plano de curvas de nivel, antetítulo (etiqueta en caja normal), titular en
+// Red Hat Display, una frase y dos teclas (mandarina + blanca). A la derecha, la foto (`imagen`) a sangre hasta el borde de
+// la ventana y de toda la altura y, encima, la libreta del taller: cabeza de tinta, el teléfono en grande, los `items`
+// ({titulo = dato, texto = qué es}) en celdas y dos teclas al pie (WhatsApp y cómo llegar). En móvil la foto va debajo
+// del texto y la libreta, montada sobre la foto. Sin `imagen`, la portada es solo texto (y la libreta no sale).
+// Sin `cta`, la tecla principal llama; sin `cta_secundario`, no hay segunda.
+import { seccion, site, tel, whatsapp, mapa, fuera, semilla } from '../../data/site';
+import { altHero } from '../../lib/seo';
+import Imagen from '../ui/Imagen.astro';
+import Icono from '../ui/Icono.astro';
+interface Props { id: string; primera?: boolean }
+const { id, primera = false } = Astro.props;
+const s = seccion(id);
+const c = site.contacto;
+const principal = s?.cta?.url ? s.cta : c.telefono ? { texto: `Llamar al ${c.telefono}`, url: tel(c.telefono) } : null;
+const secundario = s?.cta_secundario?.url ? s.cta_secundario : null;
+const datos = (s?.items ?? []).map((it) => ({ dato: String(it?.titulo ?? '').trim(), que: String(it?.texto ?? '').trim() })).filter((d) => d.dato);
+const teclas = [
+  c.whatsapp && { texto: 'WhatsApp', url: whatsapp(c.whatsapp, `Hola, os escribo desde la web de ${site.nombre}`), icono: 'whatsapp' },
+  c.direccion && { texto: 'Cómo llegar', url: mapa(c.direccion), icono: 'mapa' },
+].filter(Boolean) as { texto: string; url: string; icono: string }[];
+const libreta = !!s?.imagen && (c.telefono || datos.length > 0);
+---
+
+{
+  s && (
+    <section id={id} class:list={['portada', { 'portada--con-foto': s.imagen }]}>
+      <div class="portada-lado">
+        <div class="plano" data-plano="curvas" data-semilla={semilla(site.nombre + 'portada')} aria-hidden="true"><canvas /></div>
+        {s.antetitulo && <p class="antetitulo">{s.antetitulo}</p>}
+        <h1 class="portada-titulo">{s.titulo || site.nombre}</h1>
+        {s.texto && <p class="portada-parrafo">{s.texto}</p>}
+        {(principal || secundario) && (
+          <div class="botones">
+            {principal && <a class="btn" href={principal.url} {...fuera(principal.url)}>{principal.texto}</a>}
+            {secundario && <a class="btn-sec" href={secundario.url} {...fuera(secundario.url)}>{secundario.texto}</a>}
+          </div>
+        )}
+      </div>
+      {s.imagen && (
+        <div class="portada-foto">
+          <div class="foto foto--sangre">
+            <Imagen src={s.imagen} alt={altHero()} ancho={1536} alto={1152} prioridad={primera} />
+          </div>
+          {libreta && (
+            <div class="libreta">
+              <p class="libreta-cabeza">
+                <span><Icono nombre="telefono" tam={16} /> Llámanos</span>
+              </p>
+              {c.telefono && <a class="libreta-grande" href={tel(c.telefono)}>{c.telefono}</a>}
+              {datos.length > 0 && (
+                <dl class="celdas cuadricula">
+                  {datos.map((d) => (
+                    <div>
+                      <dt>{d.que}</dt>
+                      <dd>{d.dato}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {teclas.length > 0 && (
+                <div class:list={['teclas-pie', { 'sin-celdas': datos.length === 0 }]}>
+                  {teclas.map((t) => (
+                    <a href={t.url} {...fuera(t.url)}><Icono nombre={t.icono} tam={18} /> {t.texto}</a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
+<style>
+  .teclas-pie.sin-celdas { border-top: 1px solid var(--tinta); }
+</style>

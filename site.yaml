@@ -1,0 +1,203 @@
+# Contenido de la web. Es lo único que rellena la plataforma NoExpertise.
+# Las secciones se muestran en el orden de este fichero. Para ocultar una: activa: false.
+# Apartado nuevo: un id propio (es su ancla, /#id) con `tipo:` = el diseño de otra sección o `texto`.
+nombre: Maquinaria Bardena
+eslogan: Concesionario de tractores, taller agrícola y recambios en Ejea de los Caballeros.
+sector: maquinaria-agricola
+logo: ""          # ruta a una imagen en public/ (p. ej. /logo.svg). Vacío = nombre en texto.
+colores:
+  primario: "#2e4733"
+  acento: "#f26a2d"
+  fondo: "#f4efe5"
+  texto: "#1d1b18"
+contacto:
+  telefono: "976 000 000"
+  email: taller@maquinariabardena.es
+  direccion: "Carretera de Tauste, km 2, 50600 Ejea de los Caballeros (Zaragoza)"
+  horario: "Lunes a viernes de 8:00 a 13:30 y de 15:30 a 19:00. Sábados de 9:00 a 13:00."
+  whatsapp: "+34 676 000 000"
+redes:
+  instagram: https://www.instagram.com/
+  facebook: https://www.facebook.com/
+  linkedin: ""
+menu:
+  - { texto: Maquinaria, url: "/#maquinaria" }
+  - { texto: Ocasión, url: "/#ocasion" }
+  - { texto: Recambios, url: "/#recambios" }
+  - { texto: Taller, url: "/#taller" }
+  - { texto: Contacto, url: "/#contacto" }
+boton_cabecera: { texto: Pedir precio, url: "/#contacto" }
+seo:
+  titulo: "Maquinaria Bardena · Tractores y taller agrícola en Ejea"
+  descripcion: "Tractores, aperos y remolques nuevos y de ocasión, recambios y taller agrícola que sale al campo en Ejea de los Caballeros y las Cinco Villas."
+  tipo: AutomotiveBusiness   # tipo de schema.org
+marca_pie: true   # «Web creada con NoExpertise» en el pie
+
+secciones:
+  hero:
+    activa: true
+    antetitulo: Concesionario y taller en Ejea de los Caballeros
+    titulo: Tu tractor, a punto toda la campaña
+    texto: "Maquinaria nueva y de ocasión, recambios y taller que sale al campo."
+    imagen: /fotos/portada.jpg
+    cta: { texto: Pedir precio, url: "/#contacto" }
+    cta_secundario: { texto: Ver la ocasión, url: "/#ocasion" }
+    items:   # datos cortos en la tarjeta de la portada (titulo = dato, texto = qué es). Vacío = no salen.
+      - { titulo: Todas las marcas, texto: Reparamos }
+      - { titulo: En tu finca, texto: Servicio en el campo }
+      - { titulo: Nueva y de ocasión, texto: Maquinaria }
+      - { titulo: En 24 o 48 horas, texto: Recambios }
+
+  marcas:
+    activa: true
+    antetitulo: Marcas
+    titulo: Las marcas que vendemos y reparamos
+    texto: "Somos concesionario oficial de tractores y distribuimos aperos, remolques, riego y jardín."
+    marcas:   # nombre de la marca, qué máquinas, qué sois para ella y una línea
+      - { nombre: Verdial, gama: "Tractores de 75 a 180 CV y palas cargadoras", relacion: Concesionario oficial, texto: "Venta, garantía y servicio oficial." }
+      - { nombre: Cierzo, gama: "Gradas, cultivadores y sembradoras", relacion: Distribuidor, texto: "Aperos para secano y regadío." }
+      - { nombre: Ebrosur, gama: "Remolques basculantes y cisternas", relacion: Distribuidor, texto: "De 6 a 18 toneladas, a medida." }
+      - { nombre: Selvática, gama: "Motosierras, desbrozadoras y sopladores", relacion: Servicio oficial, texto: "Venta, afilado y reparación." }
+      - { nombre: Huertix, gama: "Motocultores y cortacéspedes", relacion: Distribuidor, texto: "Para el huerto y el jardín de casa." }
+      - { nombre: Albar Riego, gama: "Goteo, aspersión y bombas", relacion: Distribuidor, texto: "Proyecto y montaje en la finca." }
+
+  maquinaria:
+    activa: true
+    antetitulo: Maquinaria nueva
+    titulo: Del tractor a la desbrozadora
+    texto: "Te asesoramos según tus hectáreas y tu trabajo. Pide precio sin compromiso."
+    cta: { texto: Pedir precio de una máquina, url: "/#contacto" }
+    items:
+      - { titulo: Tractores, texto: "De viñedo, de frutal y de campo abierto, de 75 a 180 CV.", imagen: /fotos/tractores.jpg }
+      - { titulo: Aperos y siembra, texto: "Gradas, cultivadores, sembradoras y abonadoras.", imagen: /fotos/aperos.jpg }
+      - { titulo: Remolques, texto: "Basculantes, plataformas y cisternas.", imagen: /fotos/remolques.jpg }
+      - { titulo: Forestal y jardín, texto: "Motosierras, desbrozadoras y cortacéspedes.", imagen: /fotos/forestal-jardin.jpg }
+      - { titulo: Riego, texto: "Goteo, aspersión, bombas y filtros.", imagen: /fotos/riego.jpg }
+
+  recambios:
+    activa: true
+    antetitulo: Recambios y suministros
+    titulo: La pieza, hoy o mañana
+    texto: "Tenemos en almacén lo que más se gasta. Lo demás lo pedimos y llega en 24 o 48 horas."
+    nota: "Trae la pieza vieja o dinos la referencia y te damos el precio al momento."
+    cta: { texto: Pedir una pieza, url: "/#contacto" }
+    items:
+      - { titulo: "Filtros, aceites y correas", texto: "Para tractores y cosechadoras de todas las marcas." }
+      - { titulo: "Rejas, cuchillas y martillos", texto: "Para aperos, trituradoras y desbrozadoras." }
+      - { titulo: Neumáticos agrícolas, texto: "Montaje en el taller o en tu nave." }
+      - { titulo: Riego y fontanería, texto: "Tubería, goteros, aspersores y racores." }
+      - { titulo: Suministros ganaderos, texto: "Cercados, bebederos y comederos." }
+      - { titulo: Ropa y protección, texto: "Botas, guantes, gafas y pantalones anticorte." }
+
+  ocasion:
+    activa: true
+    antetitulo: Maquinaria de ocasión
+    titulo: Revisada en nuestro taller
+    texto: "Cada máquina sale con la revisión hecha y garantía por escrito. Precios con IVA."
+    cta: { texto: Preguntar por una máquina, url: "/#contacto" }
+    maquinas:   # una ficha por máquina; con `detalle`, tiene su propia página en /ocasion/<nombre>/
+      - nombre: "Tractor de 110 CV doble tracción"
+        categoria: Tractor
+        marca: Verdial
+        anio: "2016"
+        horas_motor: "6.200 h"
+        potencia: "110 CV"
+        carga: ""
+        precio: "38.500 €"
+        estado: Disponible
+        texto: "Cabina con aire acondicionado, tripuntal delantero y ruedas al 70 %."
+        imagen: /fotos/ocasion-tractor.jpg
+        detalle: |
+          Tractor de doble tracción de un solo dueño, que ha trabajado en cereal de secano y en algo de regadío en la zona de Tauste. Llegó a nuestro taller con el mantenimiento al día y lo hemos revisado entero antes de ponerlo a la venta.
+
+          Le hemos cambiado aceites, filtros y correas, hemos repasado frenos, embrague y la hidráulica del tripuntal, y hemos comprobado el aire acondicionado de la cabina. Las ruedas traseras están al 70 % y las delanteras, casi nuevas.
+
+          Es un tractor cómodo para jornadas largas, con potencia de sobra para una grada de discos, una sembradora o un remolque cargado. Puedes venir a verlo y probarlo en la campa cuando quieras. Sale con garantía por escrito y aceptamos tu tractor viejo como parte del pago.
+      - nombre: "Rotoempacadora de cámara fija"
+        categoria: Empacadora
+        marca: ""
+        anio: "2014"
+        horas_motor: ""
+        potencia: "Desde 70 CV"
+        carga: ""
+        precio: "14.900 €"
+        estado: Disponible
+        texto: "Pacas de 1,20 m, atado con red y cuchillas revisadas."
+        imagen: /fotos/ocasion-empacadora.jpg
+        detalle: |
+          Rotoempacadora de cámara fija para paja y forraje, con pacas de 1,20 metros de diámetro y atado con red. Ha hecho varias campañas en una explotación de Sádaba y viene con su libro de mantenimiento.
+
+          En el taller hemos revisado las cadenas, los rodillos y los rodamientos, hemos cambiado las cuchillas del rotor y hemos probado el atado con red. Funciona con tractores a partir de 70 caballos.
+
+          Es una buena opción para quien empaca para su propio ganado o hace trabajos a terceros y no quiere una máquina nueva. Te la enseñamos funcionando y, si la compras, te la llevamos a la finca.
+      - nombre: "Remolque basculante de 8 t"
+        categoria: Remolque
+        marca: Ebrosur
+        anio: "2011"
+        horas_motor: ""
+        potencia: ""
+        carga: "8.000 kg"
+        precio: "6.200 €"
+        estado: Reservada
+        texto: "Un eje, caja de chapa y frenos revisados. Papeles en regla."
+        imagen: /fotos/ocasion-remolque.jpg
+        detalle: |
+          Remolque basculante de un eje con caja de chapa, para 8.000 kilos de carga. Viene de una explotación de cereal y lo hemos repasado en el taller: frenos, luces, latiguillos del cilindro y la pintura de los puntos con más roce.
+
+          Tiene los papeles en regla para circular y la documentación lista para el cambio de nombre. Ahora mismo está reservado, pero si te interesa uno parecido, llámanos y te avisamos en cuanto entre otro.
+
+  taller:
+    activa: true
+    antetitulo: Taller propio
+    titulo: Reparamos tu máquina, sea de la marca que sea
+    texto: "Mecánica, hidráulica, electricidad y diagnosis. Te damos el precio antes de empezar."
+    imagen: /fotos/taller.jpg
+    cta: { texto: Pedir cita en el taller, url: "/#contacto" }
+    items:
+      - { titulo: Revisión antes de campaña, texto: "Niveles, filtros, frenos y luces, con informe por escrito." }
+      - { titulo: Hidráulica y tripuntal, texto: "Latiguillos, cilindros y bombas, en el día si hay pieza." }
+      - { titulo: Electricidad y diagnosis, texto: "Arranque, alternador, cableado y centralitas." }
+      - { titulo: Jardín y forestal, texto: "Afilado de cadenas, carburación y puesta a punto." }
+
+  zonas:
+    activa: true
+    antetitulo: Servicio en el campo
+    titulo: Si se para en la finca, vamos nosotros
+    texto: "Furgoneta taller con herramienta y recambios. En campaña salimos también los sábados."
+    imagen: /fotos/campo.jpg
+    aviso: { titulo: Avería en campaña, texto: "Llama o manda un WhatsApp con la ubicación y una foto de la avería." }
+    titulo_pagina: "Taller de maquinaria agrícola en {zona}"
+    texto_pagina: "Reparación de tractores y aperos en {zona}, en nuestro taller o en tu finca. Maquinaria nueva, de ocasión y recambios."
+    items:
+      - titulo: Ejea de los Caballeros
+        texto: "Aquí tenemos el taller y la tienda, en la carretera de Tauste, con la campa de maquinaria de ocasión al lado. En Ejea y en sus pueblos de colonización, como Bardena, Santa Anastasia, El Bayo o Valareña, atendemos tractores, cosechadoras y aperos de cereal, maíz y alfalfa. Si la avería es en la finca, la furgoneta taller sale desde aquí y suele llegar en menos de una hora. Y si necesitas una pieza, pásate por el mostrador: lo que más se gasta lo tenemos en almacén."
+      - titulo: Tauste
+        texto: "Vamos a Tauste casi a diario: revisiones antes de la campaña, cambios de neumáticos en la nave y reparaciones de hidráulica en el campo. Conocemos bien la maquinaria de regadío de la zona, de los tractores de maíz a los equipos de riego por aspersión, y llevamos recambios en la furgoneta para resolver en el sitio lo que se pueda. También te llevamos la maquinaria nueva o de ocasión que compres en nuestra campa."
+      - titulo: Sádaba
+        texto: "En Sádaba y en los pueblos de alrededor, como Biota, Layana o Castiliscar, trabajamos sobre todo con explotaciones de cereal de secano y de ganado. Reparamos tractores, empacadoras y remolques, y hacemos la revisión antes de la cosecha para que nada se pare en julio. Si tienes una avería, llámanos con la ubicación de la finca y te decimos cuándo podemos llegar."
+      - titulo: Luna
+        texto: "Damos servicio a Luna y a sus pedanías, como Lacorvilla y Erla, con la furgoneta taller y con recogida de la máquina si hace falta llevarla al taller. Atendemos tractores de todas las marcas, aperos de labranza y maquinaria de jardín y forestal, desde una desbrozadora que no arranca hasta una revisión completa de un tractor."
+      - { titulo: Biota, texto: "" }
+      - { titulo: Castejón de Valdejasa, texto: "" }
+
+  preguntas:
+    activa: true
+    antetitulo: Preguntas frecuentes
+    titulo: Lo que más nos preguntan
+    preguntas:
+      - { pregunta: "¿Reparáis máquinas de otras marcas?", respuesta: "Sí. Reparamos tractores, aperos y maquinaria de jardín de cualquier marca, y te damos el precio antes de empezar." }
+      - { pregunta: "¿Salís a reparar al campo?", respuesta: "Sí. Tenemos una furgoneta taller con herramienta y recambios. En campaña salimos también los sábados." }
+      - { pregunta: "¿Qué garantía tiene la maquinaria de ocasión?", respuesta: "Toda pasa por nuestro taller antes de venderse y sale con garantía por escrito. El plazo depende de la máquina y te lo decimos al darte el precio." }
+      - { pregunta: "¿Os quedáis mi tractor viejo como parte del pago?", respuesta: "Sí. Lo tasamos sin compromiso y descontamos su valor del precio de la máquina que compres." }
+      - { pregunta: "¿Puedo pagar a plazos?", respuesta: "Sí, con financiación de tu banco o de la marca. Te ayudamos a preparar los papeles." }
+
+  contacto:
+    activa: true
+    antetitulo: Contacto
+    titulo: Llama al taller o pide precio
+    texto: "Dinos qué máquina buscas o qué le pasa a la tuya. Te contestamos hoy mismo."
+    cta: { texto: Pedir precio, url: "/#contacto" }
+    horario:
+      - { dia: Lunes a viernes, horas: "8:00 a 13:30 y 15:30 a 19:00" }
+      - { dia: Sábados, horas: "9:00 a 13:00" }
+      - { dia: Domingos, horas: Cerrado }

@@ -1,0 +1,164 @@
+---
+// Ficha de un elemento con `detalle` (src/lib/paginas.ts, listas de src/data/fichas.ts): /ocasion/<slug>/.
+// Diseño Furrow: portada partida (migas, nombre, una línea, precio y teclas; a la derecha la foto a sangre), el `detalle`
+// en párrafos junto a la libreta de la máquina (cabeza de tinta con el tipo y el año, celdas con todos sus datos, estado,
+// precio bajo filete doble y teclas), las fotos de `imagenes` y otras máquinas de ocasión.
+import Base from '../../layouts/Base.astro';
+import Imagen from '../../components/ui/Imagen.astro';
+import Icono from '../../components/ui/Icono.astro';
+import { site, tel, whatsapp } from '../../data/site';
+import { fichas, relacionadas, resumen } from '../../lib/paginas';
+import type { Ficha } from '../../lib/paginas';
+import { altGaleria, jsonLdFicha, jsonLdMigas, urlBase } from '../../lib/seo';
+import { enlace, rutaDeSeccion } from '../../lib/multipagina';
+
+export function getStaticPaths() {
+  return fichas().map((f) => ({ params: { coleccion: f.def.ruta, slug: f.slug }, props: { f } }));
+}
+
+interface Props { f: Ficha }
+const { f } = Astro.props;
+const base = urlBase(Astro.site);
+const nombreSeccion = String(f.seccion.titulo || f.seccion.antetitulo || f.def.nombre).trim();
+const migas = [
+  { nombre: 'Inicio', ruta: '/' },
+  { nombre: String(f.seccion.antetitulo || nombreSeccion).trim(), ruta: rutaDeSeccion(f.idSeccion) },
+  { nombre: f.titulo, ruta: f.url },
+];
+const c = site.contacto;
+const wa = whatsapp(c.whatsapp, `Hola, me interesa: ${f.titulo}`);
+const preguntar = wa
+  ? { texto: 'Preguntar por WhatsApp', url: wa, fuera: true }
+  : c.telefono
+    ? { texto: `Llamar al ${c.telefono}`, url: tel(c.telefono), fuera: false }
+    : { texto: 'Escríbenos', url: enlace('/#contacto'), fuera: false };
+const anio = f.datos.find((d) => d.clave === 'anio')?.valor ?? '';
+const estado = f.datos.find((d) => d.clave === 'estado')?.valor ?? '';
+const ETIQUETAS: Record<string, string> = { horas_motor: 'Horas de motor', categoria: 'Tipo' };
+const CIFRAS = new Set(['anio', 'horas_motor', 'potencia', 'carga']);
+const datos = f.datos.filter((d) => !['precio', 'estado', 'anio', 'categoria'].includes(d.clave));
+const estadoClase = /disponible|en venta|nuev/i.test(estado) ? 'chip--verde' : /reserv/i.test(estado) ? 'chip--acento' : '';
+const otras = relacionadas(f, 3);
+const descripcion = resumen(f.texto || f.detalle[0] || '');
+---
+
+<Base titulo={f.titulo} descripcion={descripcion} imagen={f.imagen} ld={[jsonLdMigas(base, migas), jsonLdFicha(base, f)]}>
+  <section class:list={['portada', { 'portada--con-foto': f.imagen }]}>
+    <div class="portada-lado">
+      <nav aria-label="Migas de pan" class="migas menuda">
+        <ol>
+          {migas.map((m, i) => (
+            <li>{i < migas.length - 1 ? <a href={m.ruta}>{m.nombre}</a> : <span aria-current="page">{m.nombre}</span>}</li>
+          ))}
+        </ol>
+      </nav>
+      <h1 class="portada-titulo ficha-titulo">{f.titulo}</h1>
+      {f.texto && <p class="portada-parrafo">{f.texto}</p>}
+      {(f.precio || estado) && (
+        <p class="ficha-precio">
+          {f.precio && <span class="ocasion-precio">{f.precio}</span>}
+          {estado && <span class:list={['chip', estadoClase]}>{estado}</span>}
+        </p>
+      )}
+      <div class="botones">
+        <a class="btn" href={preguntar.url} {...(preguntar.fuera ? { rel: 'noopener', target: '_blank' } : {})}>{preguntar.texto}</a>
+        {wa && c.telefono && <a class="btn-sec" href={tel(c.telefono)}>Llamar al {c.telefono}</a>}
+      </div>
+    </div>
+    {f.imagen && (
+      <div class="portada-foto">
+        <div class="foto foto--sangre">
+          <Imagen src={f.imagen} alt={f.titulo} ancho={1400} alto={1050} prioridad />
+        </div>
+      </div>
+    )}
+  </section>
+
+  <section class="banda banda--papel">
+    <div class="contenedor ficha-cuerpo">
+      <article class="ficha-detalle">
+        {f.detalle.map((p) => <p>{p}</p>)}
+      </article>
+      <aside class="libreta ficha-lado">
+        <p class="libreta-cabeza">
+          <span>{f.categoria || f.def.nombre}</span>
+          {anio && <span class="cifra">{anio}</span>}
+        </p>
+        {datos.length > 0 && (
+          <dl class="celdas cuadricula">
+            {datos.map((d) => (
+              <div>
+                <dt>{ETIQUETAS[d.clave] ?? d.etiqueta}</dt>
+                <dd class:list={{ cifra: CIFRAS.has(d.clave) }}>{d.valor}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {(f.precio || estado) && (
+          <p class="ocasion-total">
+            {estado ? <span class:list={['chip', estadoClase]}>{estado}</span> : <span />}
+            {f.precio && <span class="ocasion-precio">{f.precio}</span>}
+          </p>
+        )}
+        <div class="teclas-pie">
+          {c.telefono && <a href={tel(c.telefono)}><Icono nombre="telefono" tam={18} /> Llamar</a>}
+          <a href={wa || enlace('/#contacto')} {...(wa ? { rel: 'noopener', target: '_blank' } : {})}><Icono nombre={wa ? 'whatsapp' : 'correo'} tam={18} /> {wa ? 'WhatsApp' : 'Escribir'}</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  {f.imagenes.length > 0 && (
+    <section class="banda banda--hoja" aria-label={`Fotos de ${f.titulo}`}>
+      <div class="contenedor">
+        <ul class="ficha-fotos">
+          {f.imagenes.map((src, i) => (
+            <li class="foto"><Imagen src={src} alt={`${f.titulo}: ${altGaleria(i).toLowerCase()}`} ancho={1000} alto={750} /></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  {otras.length > 0 && (
+    <section class="banda banda--hoja">
+      <div class="contenedor">
+        <div class="cabeza">
+          <h2 class="titulo-seccion">Más maquinaria de ocasión</h2>
+          <p class="entrada"><a class="btn-sec" href={rutaDeSeccion(f.idSeccion)}>Ver todas</a></p>
+        </div>
+        <ul class="ocasiones">
+          {otras.map((o) => (
+            <li class="ocasion libreta">
+              {o.imagen && <div class="foto"><Imagen src={o.imagen} alt={o.titulo} ancho={1400} alto={1050} /></div>}
+              <div class="ocasion-cuerpo">
+                <h3><a href={o.url}>{o.titulo}</a></h3>
+                {o.texto && <p class="ocasion-texto">{o.texto}</p>}
+              </div>
+              {o.precio && <p class="ocasion-total"><span /><span class="ocasion-precio">{o.precio}</span></p>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .migas { margin-bottom: 1.25rem; }
+  .ficha-titulo { font-size: clamp(1.85rem, .8rem + 4.4vw, 4.25rem); }
+  @media (min-width: 60rem) { .ficha-titulo { font-size: min(4.25rem, 8cqi); } }
+  .ficha-precio { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin-top: 1.75rem; padding-top: 1rem; border-top: 2px solid var(--tinta); max-width: 30rem; }
+  .ficha-precio .ocasion-precio { font-size: clamp(1.8rem, 1.4rem + 1.4vw, 2.6rem); }
+  .ficha-cuerpo { display: grid; gap: 3rem; }
+  .ficha-detalle { display: grid; gap: 1.2rem; max-width: 42rem; font-size: 1.1rem; line-height: 1.7; }
+  .ficha-detalle p:first-child { font-family: var(--fuente-titulos); font-weight: 600; letter-spacing: -0.015em; font-size: clamp(1.3rem, 1.1rem + .8vw, 1.65rem); line-height: 1.35; color: var(--tinta); }
+  .ficha-fotos { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); }
+  .ficha-fotos .foto { aspect-ratio: 4 / 3; }
+  @media (min-width: 60rem) {
+    .ficha-cuerpo { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 5rem; align-items: start; }
+    .ficha-lado { position: sticky; top: calc(var(--alto-cabecera) + 2rem); }
+  }
+  .ocasion .foto { border-radius: 0; aspect-ratio: 4 / 3; }
+  .portada-foto .foto > img { object-position: 50% 50%; }
+</style>

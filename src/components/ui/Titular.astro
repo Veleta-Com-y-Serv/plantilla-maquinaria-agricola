@@ -1,0 +1,17 @@
+---
+// Titular de sección: antetítulo como etiqueta discreta (caja normal) + título en Red Hat Display + entrada. Sin campos, no
+// pinta nada. `cabeza`: con filete de tinta arriba, título a la izquierda y entrada a la derecha en escritorio.
+interface Props { titulo?: string; antetitulo?: string; texto?: string; class?: string; nivel?: 1 | 2; cabeza?: boolean }
+const { titulo, antetitulo, texto, class: clase = '', nivel = 2, cabeza = false } = Astro.props;
+const H = nivel === 1 ? 'h1' : 'h2';
+---
+
+{
+  (titulo || antetitulo || texto) && (
+    <div class:list={[cabeza ? 'cabeza' : 'titular', clase]}>
+      {antetitulo && <p class="antetitulo">{antetitulo}</p>}
+      {titulo && <H class="titulo-seccion">{titulo}</H>}
+      {texto && <p class="entrada">{texto}</p>}
+    </div>
+  )
+}

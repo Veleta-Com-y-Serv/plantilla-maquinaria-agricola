@@ -1,0 +1,30 @@
+---
+// «Preguntas frecuentes»: titular a la izquierda (fijo al bajar en escritorio) y las preguntas en filas con filete
+// (`details/summary`, con una tecla pequeña con el signo más). Sin preguntas, no se pinta.
+import { seccion } from '../../data/site';
+import Banda from '../ui/Banda.astro';
+import Titular from '../ui/Titular.astro';
+interface Props { id: string }
+const s = seccion(Astro.props.id);
+---
+
+{
+  s && s.preguntas.length > 0 && (
+    <Banda id={Astro.props.id} color="papel">
+      <div class="preguntas-rejilla">
+        <Titular antetitulo={s.antetitulo} titulo={s.titulo} texto={s.texto} />
+        <div>
+          {s.preguntas.map((p) => (
+            <details class="faq">
+              <summary>
+                <span>{p.pregunta}</span>
+                <span class="faq-signo" aria-hidden="true" />
+              </summary>
+              {p.respuesta && <p class="faq-respuesta">{p.respuesta}</p>}
+            </details>
+          ))}
+        </div>
+      </div>
+    </Banda>
+  )
+}
